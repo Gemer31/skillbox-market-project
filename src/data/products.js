@@ -1,4 +1,4 @@
-export default [
+const PRODUCTS = [
   {
     name: 'Велосипед Foxx Fusion 28',
     category: 'bikes',
@@ -84,3 +84,7 @@ export default [
     imageSrc: 'img/dishwashers/MaunfeldMLP08I/1.webp',
   },
 ];
+
+export default function products() {
+  return PRODUCTS.map((product, index) => ({ ...product, id: index }));
+}
