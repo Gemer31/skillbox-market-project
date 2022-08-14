@@ -2,7 +2,11 @@
   <section class="catalog">
     <ProductList :products="products"/>
 
-    <PaginationBar v-model="currentPage" :items-count="countProducts" :items-per-page="productsPerPage"/>
+    <PaginationBar
+      v-model:current-page="currentPage"
+      :items-count="countProducts"
+      :items-per-page="productsPerPage"
+    />
   </section>
 </template>
 
@@ -22,6 +26,7 @@ export default {
       productsPerPage: 3,
     };
   },
+
   computed: {
     products() {
       const offset = (this.currentPage - 1) * this.productsPerPage;
