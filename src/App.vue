@@ -9,9 +9,12 @@
       </span>
     </div>
 
-    <ProductFilter :price-from="filterPriceFrom"/>
-
     <div class="content__catalog">
+      <ProductFilter
+        v-model:price-from="filterPriceFrom"
+        v-model:price-to="filterPriceTo"
+        v-model:category-id="filterCategoryId"
+      />
       <section class="catalog">
         <ProductList :products="products"/>
 
@@ -42,7 +45,7 @@ export default {
     return {
       filterPriceFrom: 0,
       filterPriceTo: 0,
-      filterCategoryId: 'bikes',
+      filterCategoryId: 'all',
       currentPage: 1,
       productsPerPage: 3,
     };
@@ -56,7 +59,7 @@ export default {
       if (this.filterPriceTo > 0) {
         filteredProducts = filteredProducts.filter((product) => product.price < this.filterPriceTo);
       }
-      if (this.filterCategoryId) {
+      if (this.filterCategoryId !== 'all') {
         filteredProducts = filteredProducts.filter((product) => product.categoryId === this.filterCategoryId);
       }
       return filteredProducts;

@@ -6,7 +6,7 @@
      @click.prevent="$emit('changePageClick')">
     {{ pageNumber }}
   </a>
-  <a v-else-if="showWithThreeDots" class="pagination__link" href="#">...</a>
+  <a v-else-if="showWithThreeDots" class="pagination__link" href="#" @click.prevent>...</a>
 </template>
 
 <script>
