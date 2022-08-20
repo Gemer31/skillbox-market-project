@@ -14,6 +14,8 @@
         v-model:price-from="filterPriceFrom"
         v-model:price-to="filterPriceTo"
         v-model:category-id="filterCategoryId"
+        v-model:color-id="filterColorId"
+        v-model:current-page="currentPage"
       />
       <section class="catalog">
         <ProductList :products="products"/>
@@ -46,6 +48,7 @@ export default {
       filterPriceFrom: 0,
       filterPriceTo: 0,
       filterCategoryId: 'all',
+      filterColorId: '',
       currentPage: 1,
       productsPerPage: 3,
     };
@@ -61,6 +64,9 @@ export default {
       }
       if (this.filterCategoryId !== 'all') {
         filteredProducts = filteredProducts.filter((product) => product.categoryId === this.filterCategoryId);
+      }
+      if (this.filterColorId.length) {
+        filteredProducts = filteredProducts.filter((product) => product.availableColorsIds.includes(this.filterColorId));
       }
       return filteredProducts;
     },
