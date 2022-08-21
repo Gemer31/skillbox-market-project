@@ -1,13 +1,13 @@
 <template>
-  <a class="catalog__pic" href="#">
-    <img :src="product.imageSrc" alt="Название товара">
+  <a class="catalog__pic" href="#" @click.prevent="gotoPage('product', { id: product.id })">
+    <img :src="product.images[0]" alt="Название товара">
   </a>
 
   <h3 class="catalog__title">
     <a href="#">{{ product.name }}</a>
   </h3>
 
-  <span class="catalog__price">{{ product.price }}</span>
+  <span class="catalog__price">{{ $filters.numberFormat(product.price) }} BYN</span>
 
   <ul class="colors colors--black">
     <li class="colors__item" v-for="colorId in product.availableColorsIds" :key="product.id + colorId">
@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import colors from '@/data/colors';
+import { getColorValue, gotoPage } from '@/helpers/common';
 
 export default {
   name: 'ProductItem',
@@ -37,9 +37,8 @@ export default {
     };
   },
   methods: {
-    getColorValue(colorId) {
-      return colors.find((color) => color.id === colorId).value;
-    },
+    getColorValue,
+    gotoPage,
   },
   computed: {
   },
