@@ -1,7 +1,7 @@
 <template>
-  <a class="catalog__pic" href="#" @click.prevent="gotoPage('product', { id: product.id })">
+  <router-link class="catalog__pic" :to="{ name: 'product', params: { id: product.id } }">
     <img :src="product.images[0]" alt="Название товара">
-  </a>
+  </router-link>
 
   <h3 class="catalog__title">
     <a href="#">{{ product.name }}</a>
@@ -24,7 +24,7 @@
 </template>
 
 <script>
-import { getColorValue, gotoPage } from '@/helpers/common';
+import { getColorValue } from '@/helpers/common';
 
 export default {
   name: 'ProductItem',
@@ -38,7 +38,6 @@ export default {
   },
   methods: {
     getColorValue,
-    gotoPage,
   },
   computed: {
   },

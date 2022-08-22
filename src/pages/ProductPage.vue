@@ -4,14 +4,14 @@
 
       <ul class="breadcrumbs">
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="#" @click.prevent="gotoPage('main')">
+          <router-link class="breadcrumbs__link" :to="{ name: 'main' }">
             Каталог
-          </a>
+          </router-link>
         </li>
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="#" @click.prevent="gotoPage('main')">
+          <router-link class="breadcrumbs__link" :to="{ name: 'main' }">
             {{ category.title }}
-          </a>
+          </router-link>
         </li>
         <li class="breadcrumbs__item">
           <a class="breadcrumbs__link">
@@ -39,7 +39,7 @@
         <span class="item__code">Артикул: {{ product.id }}</span>
         <h2 class="item__title">{{ product.name }}</h2>
         <div class="item__form">
-          <form class="form" action="#" method="POST">
+          <form class="form" action="#" method="POST" @submit.prevent="addToCart">
             <b class="item__price">{{ $filters.numberFormat(product.price) }} BYN</b>
 
             <fieldset class="form__block">
@@ -62,17 +62,17 @@
 
             <div class="item__row">
               <div class="form__counter">
-                <button type="button" aria-label="Убрать один товар" @click.prevent="count = count - 1">
+                <button type="button" aria-label="Убрать один товар" @click.prevent="amount = amount - 1">
                   <svg width="12" height="12" fill="currentColor">
                     <use xlink:href="#icon-minus"></use>
                   </svg>
                 </button>
 
                 <label :for="counter">
-                  <input id="counter" type="text" name="count" v-model="currentCount">
+                  <input id="counter" type="text" name="count" v-model.number="amount">
                 </label>
 
-                <button type="button" aria-label="Добавить один товар" @click.prevent="count = count + 1">
+                <button type="button" aria-label="Добавить один товар" @click.prevent="amount = amount + 1">
                   <svg width="12" height="12" fill="currentColor">
                     <use xlink:href="#icon-plus"></use>
                   </svg>
@@ -158,21 +158,20 @@
 <script>
 import categories from '@/data/categories';
 import products from '@/data/products';
-import { getColorValue, gotoPage } from '@/helpers/common';
+import { getColorValue } from '@/helpers/common';
 
 export default {
   name: 'ProductPage',
-  props: ['pageParams'],
   data() {
     return {
       selectedColor: '',
       selectedImageSrc: '',
-      count: 1,
+      amount: 1,
     };
   },
   computed: {
     product() {
-      return products().find((product) => product.id === this.pageParams.id);
+      return products().find((product) => product.id === +this.$route.params.id);
     },
     category() {
       return categories.find((category) => this.product.categoryId === category.id);
@@ -185,21 +184,15 @@ export default {
         this.selectedColor = value;
       },
     },
-    currentCount: {
-      get() {
-        return this.count;
-      },
-      set(value) {
-        this.count = +value;
-      },
-    },
   },
   mounted() {
     this.selectedImageSrc = this.product.images?.[0];
   },
   methods: {
     getColorValue,
-    gotoPage,
+    addToCart() {
+      this.$store.commit('addProductToCart', { productId: this.product.id, amount: this.amount });
+    },
   },
 };
 </script>

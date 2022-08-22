@@ -1,44 +1,21 @@
 <template>
-  <component :is="currentPageComponent" :page-params="currentPageParams"/>
+  <HeaderView/>
+  <router-view/>
+  <FooterView/>
 </template>
 
 <script>
-import MainPage from '@/pages/MainPage.vue';
-import ProductPage from '@/pages/ProductPage.vue';
-import NotFoundPage from '@/pages/NotFoundPage.vue';
-import eventBus from '@/eventBus';
-
-const routes = {
-  main: 'MainPage',
-  product: 'ProductPage',
-};
+import HeaderView from '@/components/HeaderView.vue';
+import FooterView from '@/components/FooterView.vue';
 
 export default {
   name: 'App',
+  components: { HeaderView, FooterView },
   data() {
     return {
       currentPage: 'main',
       currentPageParams: {},
     };
-  },
-  components: {
-    ProductPage,
-    MainPage,
-    NotFoundPage,
-  },
-  methods: {
-    gotoPage(pageName, pageParams) {
-      this.currentPage = pageName;
-      this.currentPageParams = pageParams || {};
-    },
-  },
-  computed: {
-    currentPageComponent() {
-      return routes[this.currentPage] || 'NotFoundPage';
-    },
-  },
-  created() {
-    eventBus.$on('gotoPage', (pageName, pageParams) => this.gotoPage(pageName, pageParams));
   },
 };
 </script>
