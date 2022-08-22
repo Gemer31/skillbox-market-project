@@ -21,7 +21,7 @@ const routes = [
     component: CartPage,
   },
   {
-    path: '/*',
+    path: '/:catchAll(.*)',
     name: 'notFound',
     component: NotFoundPage,
   },
