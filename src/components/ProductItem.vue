@@ -1,6 +1,6 @@
 <template>
   <router-link class="catalog__pic" :to="{ name: 'product', params: { id: product.id } }">
-    <img :src="product.images[0]" alt="Название товара">
+    <img :src="product.image" alt="Название товара">
   </router-link>
 
   <h3 class="catalog__title">
@@ -10,22 +10,13 @@
   <span class="catalog__price">{{ $filters.numberFormat(product.price) }} BYN</span>
 
   <ul class="colors colors--black">
-    <li class="colors__item" v-for="colorId in product.availableColorsIds" :key="product.id + colorId">
-      <label :for="product.id + colorId" class="colors__label">
-        <input :id="product.id + colorId"
-               class="colors__radio sr-only" type="radio"
-               :value="colorId"
-               v-model="selectedColor"
-        >
-        <span class="colors__value" :style="{ 'background-color': getColorValue(colorId) }"></span>
-      </label>
+    <li class="colors__item" v-for="color in product.colors" :key="color.id">
+      <span class="colors__value" :style="{ 'background-color': color.code }"></span>
     </li>
   </ul>
 </template>
 
 <script>
-import { getColorValue } from '@/helpers/common';
-
 export default {
   name: 'ProductItem',
   props: [
@@ -33,13 +24,8 @@ export default {
   ],
   data() {
     return {
-      selectedColor: this.product.availableColorsIds[0],
+      selectedColorId: this.product.colors[0].id,
     };
-  },
-  methods: {
-    getColorValue,
-  },
-  computed: {
   },
 };
 </script>

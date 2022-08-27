@@ -1,9 +1,9 @@
 <template>
   <li class="cart__item product">
     <div class="product__pic">
-      <img :src="item.product.images[0]" width="120" height="120" :alt="item.product.name">
+      <img :src="item.product.image.file.url" width="120" height="120" :alt="item.product.title">
     </div>
-    <h3 class="product__title">{{ item.product.name }}</h3>
+    <h3 class="product__title">{{ item.product.title }}</h3>
     <span class="product__code">Артикул: {{ item.productId }}</span>
 
     <div class="product__counter form__counter">
@@ -29,7 +29,7 @@
     <button class="product__del button-del"
             type="button"
             aria-label="Удалить товар из корзины"
-            @click.prevent="deleteProduct({ productId: item.productId })">
+            @click.prevent="deleteProductFromCart({ productId: item.productId })">
       <svg width="20" height="20" fill="currentColor">
         <use xlink:href="#icon-close"></use>
       </svg>
@@ -38,14 +38,13 @@
 </template>
 
 <script>
-
-import { mapMutations } from 'vuex';
+import { mapActions } from 'vuex';
 
 export default {
   name: 'CartItem',
   props: ['item'],
   methods: {
-    ...mapMutations({ deleteProduct: 'deleteCartProduct' }),
+    ...mapActions(['deleteProductFromCart']),
   },
   computed: {
     amount: {
@@ -53,7 +52,7 @@ export default {
         return this.item.amount;
       },
       set(value) {
-        this.$store.commit('updateCartProductAmount', {
+        this.$store.dispatch('updateCartProductAmount', {
           productId: this.item.productId,
           amount: value,
         });

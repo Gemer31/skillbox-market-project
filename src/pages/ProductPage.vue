@@ -1,7 +1,8 @@
 <template>
-  <main class="content container">
+  <main class="content container"><DataLoader :width="200" :height="200"/></main>
+  <main v-if="productLoadingFailed" class="content container"><DataLoadingError :svg-height="100" :svg-width="100"/></main>
+  <main class="content container" v-else>
     <div class="content__top">
-
       <ul class="breadcrumbs">
         <li class="breadcrumbs__item">
           <router-link class="breadcrumbs__link" :to="{ name: 'main' }">
@@ -24,15 +25,8 @@
     <section class="item">
       <div class="item__pics pics">
         <div class="pics__wrapper">
-          <img width="570" height="570" :src="selectedImageSrc" :alt="product.name">
+          <img width="570" height="570" :src="product.image.file.url" :alt="product.name">
         </div>
-        <ul class="pics__list">
-          <li class="pics__item" v-for="image in product.images" :key="image">
-            <a href="#" class="pics__link pics__link--current" @click.prevent="selectedImageSrc = image">
-              <img width="98" height="98" :src="image" :alt="product.name">
-            </a>
-          </li>
-        </ul>
       </div>
 
       <div class="item__info">
@@ -45,15 +39,15 @@
             <fieldset class="form__block">
               <legend class="form__legend">Цвет:</legend>
               <ul class="colors">
-                <li class="colors__item" v-for="colorId in product.availableColorsIds" :key="product.id + colorId">
-                  <label :for="product.id + colorId" class="colors__label">
+                <li class="colors__item" v-for="color in product.colors" :key="product.id + '-' + color.id">
+                  <label :for="product.id + '-' + color.id" class="colors__label">
                     <input class="colors__radio sr-only"
                            type="radio"
-                           :id="product.id + colorId"
-                           :value="colorId"
+                           :id="product.id + '-' + colorId"
+                           :value="color.id"
                            v-model="currentColor"
                     >
-                    <span class="colors__value" :style="{ 'background-color': getColorValue(colorId) }">
+                    <span class="colors__value" :style="{ 'background-color': color.code }">
                     </span>
                   </label>
                 </li>
@@ -79,102 +73,52 @@
                 </button>
               </div>
 
-              <button class="button button--primery" type="submit">
+              <button class="button button--primery" type="submit" :disabled="productAddSending">
                 В корзину
               </button>
             </div>
+
+            <div v-show="productAdded">Товар в тележке!</div>
+            <div v-show="productAddSending">Закидываем товар в тележку...</div>
           </form>
         </div>
       </div>
-
-<!--      <div class="item__desc">-->
-<!--        <ul class="tabs">-->
-<!--          <li class="tabs__item">-->
-<!--            <a class="tabs__link tabs__link&#45;&#45;current">-->
-<!--              Описание-->
-<!--            </a>-->
-<!--          </li>-->
-<!--          <li class="tabs__item">-->
-<!--            <a class="tabs__link" href="#">-->
-<!--              Характеристики-->
-<!--            </a>-->
-<!--          </li>-->
-<!--          <li class="tabs__item">-->
-<!--            <a class="tabs__link" href="#">-->
-<!--              Гарантия-->
-<!--            </a>-->
-<!--          </li>-->
-<!--          <li class="tabs__item">-->
-<!--            <a class="tabs__link" href="#">-->
-<!--              Оплата и доставка-->
-<!--            </a>-->
-<!--          </li>-->
-<!--        </ul>-->
-
-<!--        <div class="item__content">-->
-<!--          <p>-->
-<!--            Навигация GPS, ГЛОНАСС, BEIDOU Galileo и QZSS<br>-->
-<!--            Синхронизация со смартфоном<br>-->
-<!--            Связь по Bluetooth Smart, ANT+ и Wi-Fi<br>-->
-<!--            Поддержка сторонних приложений<br>-->
-<!--          </p>-->
-
-<!--          <a href="#">-->
-<!--            Все характеристики-->
-<!--          </a>-->
-
-<!--          <h3>Что это?</h3>-->
-
-<!--          <p>-->
-<!--            Wahoo ELEMNT BOLT GPS – это велокомпьютер, который позволяет оптимизировать свои велотренировки, сделав их-->
-<!--            максимально эффективными.-->
-<!--            Wahoo ELEMNT BOLT GPS синхронизируется с датчиками по ANT+, объединяя полученную с них информацию.-->
-<!--            Данные отображаются на дисплее, а также сохраняются на смартфоне.-->
-<!--            При этом на мобильное устройство можно установить как фирменное приложение, так и различные приложения-->
-<!--            сторонних разработчиков.-->
-<!--            Велокомпьютер точно отслеживает местоположение, принимая сигнал с целого комплекса спутников. Эта информация-->
-<!--            позволяет смотреть уже преодоленные маршруты и планировать новые велопрогулки.-->
-<!--          </p>-->
-
-<!--          <h3>Дизайн</h3>-->
-
-<!--          <p>-->
-<!--            Велокомпьютер Wahoo ELEMNT BOLT очень компактный. Размеры устройства составляют всего 74,6 x 47,3 x 22,1 мм.-->
-<!--            что не превышает габариты смартфона. Корпус гаджета выполнен из черного пластика.-->
-<!--            На обращенной к пользователю стороне расположен дисплей диагональю 56 мм.-->
-<!--            На дисплей выводятся координаты и скорость, а также полученная со смартфона и синхронизированных датчиков-->
-<!--            информация: интенсивность, скорость вращения педалей, пульс и т.д.-->
-<!--            (датчики не входят в комплект поставки).-->
-<!--            Корпус велокомпьютера имеет степень защиты от влаги IPX7.-->
-<!--            Это означает, что устройство не боится пыли, а также выдерживает кратковременное (до 30 минут) погружение в-->
-<!--            воду на глубину не более 1 метра.-->
-<!--          </p>-->
-<!--        </div>-->
-<!--      </div>-->
     </section>
   </main>
 </template>
 
 <script>
-import categories from '@/data/categories';
-import products from '@/data/products';
-import { getColorValue } from '@/helpers/common';
+import axios from 'axios';
+import API_BASE_URL from '@/config';
+import { mapActions } from 'vuex';
+import DataLoadingError from '@/components/DataLoadingError.vue';
+import DataLoader from '@/components/DataLoader.vue';
 
 export default {
   name: 'ProductPage',
+  components: {
+    DataLoadingError,
+    DataLoader,
+  },
   data() {
     return {
       selectedColor: '',
       selectedImageSrc: '',
       amount: 1,
+
+      productData: null,
+      productLoading: false,
+      productLoadingFailed: false,
+      productAdded: false,
+      productAddSending: false,
     };
   },
   computed: {
     product() {
-      return products().find((product) => product.id === +this.$route.params.id);
+      return this.productData;
     },
     category() {
-      return categories.find((category) => this.product.categoryId === category.id);
+      return this.productData.category;
     },
     currentColor: {
       get() {
@@ -185,18 +129,49 @@ export default {
       },
     },
   },
-  mounted() {
-    this.selectedImageSrc = this.product.images?.[0];
-  },
   methods: {
-    getColorValue,
+    ...mapActions(['addProductToCart']),
     addToCart() {
-      this.$store.commit('addProductToCart', { productId: this.product.id, amount: this.amount });
+      this.productAdded = false;
+      this.productAddSending = true;
+
+      this.addProductToCart({
+        productId: this.product.id,
+        amount: this.amount,
+      })
+        .then(() => {
+          this.productAdded = true;
+          this.productAddSending = false;
+        });
+    },
+    loadProduct() {
+      this.productLoading = true;
+      this.productLoadingFailed = false;
+      axios.get(`${API_BASE_URL}/api/products/${+this.$route.params.id}`)
+        .then((response) => {
+          this.productData = response.data;
+        })
+        .catch(() => {
+          this.productLoadingFailed = true;
+        })
+        .then(() => {
+          this.productLoading = false;
+        });
+    },
+  },
+  watch: {
+    '$route.params.id': {
+      handler() {
+        this.loadProduct();
+      },
+      immediate: true,
     },
   },
 };
 </script>
 
 <style scoped>
+.product-data-loader {
 
+}
 </style>

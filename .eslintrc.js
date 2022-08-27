@@ -18,6 +18,7 @@ module.exports = {
       'error',
       {
         code: 200,
+        ignorePattern: '<path',
       },
     ],
   },
