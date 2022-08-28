@@ -21,6 +21,7 @@
 
         <DataLoader v-if="productsLoading" :width="200" :height="200" />
         <DataLoadingError v-if="productsLoadingFailed" :svg-height="100" :svg-width="100"/>
+
         <ProductList :products="products"/>
 
         <PaginationBar

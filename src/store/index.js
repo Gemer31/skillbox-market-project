@@ -52,7 +52,7 @@ export default createStore({
   },
   actions: {
     loadCart(context) {
-      axios.get(`${API_BASE_URL}/api/baskets`, { params: { userAccessKey: context.state.userAccessKey } })
+      return axios.get(`${API_BASE_URL}/api/baskets`, { params: { userAccessKey: context.state.userAccessKey } })
         .then((response) => {
           if (!context.state.userAccessKey) {
             localStorage.setItem('userAccessKey', response.data.user.accessKey);

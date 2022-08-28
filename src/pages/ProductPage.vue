@@ -1,6 +1,10 @@
 <template>
-  <main class="content container"><DataLoader :width="200" :height="200"/></main>
-  <main v-if="productLoadingFailed" class="content container"><DataLoadingError :svg-height="100" :svg-width="100"/></main>
+  <main v-if="productLoading" class="content container product-data-loader">
+    <DataLoader :width="200" :height="200"/>
+  </main>
+  <main v-else-if="productLoadingFailed" class="content container product-data-loader">
+    <DataLoadingError :svg-height="100" :svg-width="100"/>
+  </main>
   <main class="content container" v-else>
     <div class="content__top">
       <ul class="breadcrumbs">
@@ -76,10 +80,10 @@
               <button class="button button--primery" type="submit" :disabled="productAddSending">
                 В корзину
               </button>
-            </div>
 
-            <div v-show="productAdded">Товар в тележке!</div>
-            <div v-show="productAddSending">Закидываем товар в тележку...</div>
+              <DataLoader v-if="productAddSending" :width="50" :height="50"/>
+              <DataProcessedSuccessfullyItem v-if="productAdded" :width="50" :height="50"/>
+            </div>
           </form>
         </div>
       </div>
@@ -93,12 +97,14 @@ import API_BASE_URL from '@/config';
 import { mapActions } from 'vuex';
 import DataLoadingError from '@/components/DataLoadingError.vue';
 import DataLoader from '@/components/DataLoader.vue';
+import DataProcessedSuccessfullyItem from '@/components/DataProcessedSuccessfullyItem.vue';
 
 export default {
   name: 'ProductPage',
   components: {
     DataLoadingError,
     DataLoader,
+    DataProcessedSuccessfullyItem,
   },
   data() {
     return {
@@ -142,6 +148,9 @@ export default {
         .then(() => {
           this.productAdded = true;
           this.productAddSending = false;
+          setTimeout(() => {
+            this.productAdded = false;
+          }, 2000);
         });
     },
     loadProduct() {
@@ -172,6 +181,9 @@ export default {
 
 <style scoped>
 .product-data-loader {
-
+  display: flex;
+}
+.item__row {
+  grid-template-columns:150px 224px 50px;
 }
 </style>

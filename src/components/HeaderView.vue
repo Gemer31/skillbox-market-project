@@ -9,18 +9,25 @@
 
       <a class="header__tel" href="tel:8 800 600 90 09">8 800 600 90 09</a>
 
-      <CartIndicator/>
+      <DataLoader v-if="cartLoading" :width="30" :height="30"/>
+      <DataLoadingError v-else-if="cartLoadingFailed" :svg-height="30" :svg-width="30" :no-message="true" :svg-color="'white'"/>
+      <CartIndicator v-else/>
     </div>
   </header>
 </template>
 
 <script>
 import CartIndicator from '@/components/CartIndicator.vue';
+import DataLoader from '@/components/DataLoader.vue';
+import DataLoadingError from '@/components/DataLoadingError.vue';
 
 export default {
   name: 'HeaderView',
+  props: ['cartLoading', 'cartLoadingFailed'],
   components: {
     CartIndicator,
+    DataLoader,
+    DataLoadingError,
   },
 };
 </script>

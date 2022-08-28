@@ -1,6 +1,6 @@
 <template>
-  <HeaderView/>
-  <router-view/>
+  <HeaderView :cart-loading="cartLoading" :cart-loading-failed="cartLoadingFailed"/>
+  <router-view :cart-loading="cartLoading" :cart-loading-failed="cartLoadingFailed" />
   <FooterView/>
 </template>
 
@@ -11,11 +11,17 @@ import { mapActions, mapMutations } from 'vuex';
 
 export default {
   name: 'App',
-  components: { HeaderView, FooterView },
+  components: {
+    HeaderView,
+    FooterView,
+  },
   data() {
     return {
       currentPage: 'main',
       currentPageParams: {},
+
+      cartLoading: true,
+      cartLoadingFailed: false,
     };
   },
   created() {
@@ -23,7 +29,13 @@ export default {
     if (userAccessKey) {
       this.updateUserAccessKey(userAccessKey);
     }
-    this.loadCart();
+    this.loadCart()
+      .catch(() => {
+        this.cartLoadingFailed = true;
+      })
+      .then(() => {
+        this.cartLoading = false;
+      });
   },
   methods: {
     ...mapActions(['loadCart']),
