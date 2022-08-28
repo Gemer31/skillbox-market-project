@@ -21,5 +21,8 @@ module.exports = {
         ignorePattern: '<path',
       },
     ],
+    'vuejs-accessibility/label-has-for': 'off',
+    'vuejs-accessibility/form-control-has-label': 'off',
+    'jsx-a11y/label-has-associated-control': 'off',
   },
 };
