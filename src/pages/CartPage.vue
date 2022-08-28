@@ -36,12 +36,9 @@
             Итого: <span>{{ $filters.numberFormat(totalPrice) }} BYN</span>
           </p>
 
-          <router-link class="cart__button button button--primery"
-                       :class="{ disabled: !products.length }"
-                       type="submit"
-                       :to="{ name: 'order' }"
-                       :disabled="true"
-          >Оформить заказ</router-link>
+          <router-link v-slot="{ navigate }" :to="{ name: 'order' }" custom>
+            <button class="cart__button button button--primery" type="submit" :disabled="!products.length" @click="navigate" >Оформить заказ</button>
+          </router-link>
         </div>
       </form>
     </section>
@@ -76,9 +73,5 @@ export default {
 <style scoped>
 .cart-data-loader {
   display: flex;
-}
-.disabled {
-  opacity: 0.5;
-  pointer-events: none;
 }
 </style>

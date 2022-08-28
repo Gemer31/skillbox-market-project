@@ -3,28 +3,17 @@
     <div class="content__top">
       <ul class="breadcrumbs">
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="index.html">
-            Каталог
-          </a>
+          <a class="breadcrumbs__link" href="index.html">Каталог</a>
         </li>
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="cart.html">
-            Корзина
-          </a>
+          <a class="breadcrumbs__link" href="cart.html">Корзина</a>
         </li>
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link">
-            Оформление заказа
-          </a>
+          <a class="breadcrumbs__link">Оформление заказа</a>
         </li>
       </ul>
 
-      <h1 class="content__title">
-        Корзина
-      </h1>
-      <span class="content__info">
-        3 товара
-      </span>
+      <h1 class="content__title">Корзина</h1>
     </div>
 
     <section class="cart">
