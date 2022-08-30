@@ -154,18 +154,20 @@ export default {
         });
     },
     loadProduct() {
-      this.productLoading = true;
-      this.productLoadingFailed = false;
-      axios.get(`${API_BASE_URL}/api/products/${+this.$route.params.id}`)
-        .then((response) => {
-          this.productData = response.data;
-        })
-        .catch(() => {
-          this.productLoadingFailed = true;
-        })
-        .then(() => {
-          this.productLoading = false;
-        });
+      if (+this.$route.params.id) {
+        this.productLoading = true;
+        this.productLoadingFailed = false;
+        axios.get(`${API_BASE_URL}/api/products/${+this.$route.params.id}`)
+          .then((response) => {
+            this.productData = response.data;
+          })
+          .catch(() => {
+            this.productLoadingFailed = true;
+          })
+          .then(() => {
+            this.productLoading = false;
+          });
+      }
     },
   },
   watch: {
@@ -183,6 +185,7 @@ export default {
 .product-data-loader {
   display: flex;
 }
+
 .item__row {
   grid-template-columns:150px 224px 50px;
 }
