@@ -1,8 +1,8 @@
 <template>
-  <div v-if="productLoading" class=" product-data-loader">
+  <div v-if="fetchStatus.isLoading" class=" product-data-loader">
     <DataLoader :width="200" :height="200"/>
   </div>
-  <div v-else-if="productLoadingFailed" class=" product-data-loader">
+  <div v-else-if="fetchStatus.isFailed" class=" product-data-loader">
     <DataLoadingError :svg-height="100" :svg-width="100"/>
   </div>
   <div v-else>
@@ -72,102 +72,89 @@
 </template>
 
 <script>
-
-import axios from 'axios';
-import API_BASE_URL from '@/config';
-import { mapActions } from 'vuex';
+import { useStore } from 'vuex';
 import DataLoadingError from '@/components/DataLoadingError.vue';
 import DataLoader from '@/components/DataLoader.vue';
 import DataProcessedSuccessfullyItem from '@/components/DataProcessedSuccessfullyItem.vue';
+import {
+  ref, computed, defineComponent, watch,
+} from 'vue';
+import useProduct from '@/hooks/useProduct';
 
-export default {
-  name: 'ProductQuickView',
+export default defineComponent({
   props: {
-    productId: { type: [Number, String], required: true },
+    productId: {
+      type: [Number, String],
+      required: true,
+    },
   },
   components: {
     DataLoadingError,
     DataLoader,
     DataProcessedSuccessfullyItem,
   },
-  data() {
-    return {
-      selectedColor: '',
-      selectedImageSrc: '',
-      amount: 1,
+  setup(props) {
+    const $store = useStore();
+    const {
+      product,
+      category,
+      fetchProduct,
+      fetchStatus,
+    } = useProduct();
 
-      productData: null,
-      productLoading: true,
-      productLoadingFailed: false,
-      productAdded: false,
-      productAddSending: false,
-    };
-  },
-  computed: {
-    product() {
-      return this.productData;
-    },
-    category() {
-      return this.productData.category;
-    },
-    currentColor: {
+    const selectedColor = ref('');
+    const amount = ref(1);
+    const productAdded = ref(false);
+    const productAddSending = ref(false);
+
+    const currentColor = computed({
       get() {
-        return this.selectedColor;
+        return selectedColor.value;
       },
       set(value) {
-        this.selectedColor = value;
+        selectedColor.value = value;
       },
-    },
-  },
-  methods: {
-    ...mapActions(['addProductToCart']),
-    addToCart() {
-      this.productAdded = false;
-      this.productAddSending = true;
+    });
 
-      this.addProductToCart({
-        productId: this.product.id,
-        amount: this.amount,
+    const doAddToCart = () => {
+      productAdded.value = false;
+      productAddSending.value = true;
+
+      $store.dispatch('addProductToCart', {
+        productId: product.value.id,
+        amount,
       })
         .then(() => {
-          this.productAdded = true;
-          this.productAddSending = false;
+          productAdded.value = true;
+          productAddSending.value = false;
           setTimeout(() => {
-            this.productAdded = false;
+            productAdded.value = false;
           }, 2000);
         });
-    },
-    loadProduct() {
-      if (this.productId) {
-        this.productLoading = true;
-        this.productLoadingFailed = false;
-        axios.get(`${API_BASE_URL}/api/products/${this.productId}`)
-          .then((response) => {
-            this.productData = response.data;
-          })
-          .catch(() => {
-            this.productLoadingFailed = true;
-          })
-          .then(() => {
-            this.productLoading = false;
-          });
+    };
+
+    watch(() => props.productId, (value) => {
+      if (value) {
+        fetchProduct(value);
       }
-    },
+    }, { immediate: true });
+
+    return {
+      selectedColor,
+      amount,
+      productData: product,
+      fetchStatus,
+      productAdded,
+      productAddSending,
+
+      product,
+      category,
+      currentColor,
+
+      doAddToCart,
+    };
   },
-  created() {
-    if (this.productId) {
-      this.loadProduct();
-    }
-  },
-  // watch: {
-  //   '$route.params.id': {
-  //     handler() {
-  //       this.loadProduct();
-  //     },
-  //     immediate: true,
-  //   },
-  // },
-};
+});
 </script>
 
 <style scoped>

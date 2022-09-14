@@ -1,8 +1,8 @@
 <template>
-  <main v-if="productLoading" class="content container product-data-loader">
+  <main v-if="fetchStatus.isLoading" class="content container product-data-loader">
     <DataLoader :width="200" :height="200"/>
   </main>
-  <main v-else-if="productLoadingFailed" class="content container product-data-loader">
+  <main v-else-if="fetchStatus.isFailed" class="content container product-data-loader">
     <DataLoadingError :svg-height="100" :svg-width="100"/>
   </main>
   <main class="content container" v-else>
@@ -37,7 +37,7 @@
         <span class="item__code">Артикул: {{ product.id }}</span>
         <h2 class="item__title">{{ product.name }}</h2>
         <div class="item__form">
-          <form class="form" action="#" method="POST" @submit.prevent="addToCart">
+          <form class="form" action="#" method="POST" @submit.prevent="doAddToCart">
             <b class="item__price">{{ $filters.numberFormat(product.price) }} BYN</b>
 
             <fieldset class="form__block">
@@ -92,93 +92,85 @@
 </template>
 
 <script>
-import axios from 'axios';
-import API_BASE_URL from '@/config';
-import { mapActions } from 'vuex';
+import { useStore } from 'vuex';
 import DataLoadingError from '@/components/DataLoadingError.vue';
 import DataLoader from '@/components/DataLoader.vue';
 import DataProcessedSuccessfullyItem from '@/components/DataProcessedSuccessfullyItem.vue';
+import {
+  ref, computed, defineComponent, watch,
+} from 'vue';
+import { useRoute } from 'vue-router';
+import useProduct from '@/hooks/useProduct';
 
-export default {
-  name: 'ProductPage',
+export default defineComponent({
   components: {
     DataLoadingError,
     DataLoader,
     DataProcessedSuccessfullyItem,
   },
-  data() {
-    return {
-      selectedColor: '',
-      selectedImageSrc: '',
-      amount: 1,
+  setup() {
+    const $route = useRoute();
+    const $store = useStore();
+    const {
+      product,
+      category,
+      fetchProduct,
+      fetchStatus,
+    } = useProduct();
 
-      productData: null,
-      productLoading: false,
-      productLoadingFailed: false,
-      productAdded: false,
-      productAddSending: false,
-    };
-  },
-  computed: {
-    product() {
-      return this.productData;
-    },
-    category() {
-      return this.productData.category;
-    },
-    currentColor: {
+    const selectedColor = ref('');
+    const amount = ref(1);
+    const productAdded = ref(false);
+    const productAddSending = ref(false);
+
+    const currentColor = computed({
       get() {
-        return this.selectedColor;
+        return selectedColor.value;
       },
       set(value) {
-        this.selectedColor = value;
+        selectedColor.value = value;
       },
-    },
-  },
-  methods: {
-    ...mapActions(['addProductToCart']),
-    addToCart() {
-      this.productAdded = false;
-      this.productAddSending = true;
+    });
 
-      this.addProductToCart({
-        productId: this.product.id,
-        amount: this.amount,
+    const doAddToCart = () => {
+      productAdded.value = false;
+      productAddSending.value = true;
+
+      $store.dispatch('addProductToCart', {
+        productId: product.value.id,
+        amount,
       })
         .then(() => {
-          this.productAdded = true;
-          this.productAddSending = false;
+          productAdded.value = true;
+          productAddSending.value = false;
           setTimeout(() => {
-            this.productAdded = false;
+            productAdded.value = false;
           }, 2000);
         });
-    },
-    loadProduct() {
-      if (+this.$route.params.id) {
-        this.productLoading = true;
-        this.productLoadingFailed = false;
-        axios.get(`${API_BASE_URL}/api/products/${+this.$route.params.id}`)
-          .then((response) => {
-            this.productData = response.data;
-          })
-          .catch(() => {
-            this.productLoadingFailed = true;
-          })
-          .then(() => {
-            this.productLoading = false;
-          });
+    };
+
+    watch(() => $route.params.id, (value) => {
+      if (value) {
+        fetchProduct(value);
       }
-    },
+    }, { immediate: true });
+
+    return {
+      selectedColor,
+      amount,
+      productData: product,
+      fetchStatus,
+      productAdded,
+      productAddSending,
+
+      product,
+      category,
+      currentColor,
+
+      doAddToCart,
+    };
   },
-  watch: {
-    '$route.params.id': {
-      handler() {
-        this.loadProduct();
-      },
-      immediate: true,
-    },
-  },
-};
+});
 </script>
 
 <style scoped>
