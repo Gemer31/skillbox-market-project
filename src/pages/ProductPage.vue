@@ -20,7 +20,7 @@
         </li>
         <li class="breadcrumbs__item">
           <a class="breadcrumbs__link">
-            {{ product.name }}
+            {{ product.title }}
           </a>
         </li>
       </ul>
@@ -29,7 +29,7 @@
     <section class="item">
       <div class="item__pics pics">
         <div class="pics__wrapper">
-          <img width="570" height="570" :src="product.image.file.url" :alt="product.name">
+          <img width="570" height="570" :src="product.preview.file.url" :alt="product.name">
         </div>
       </div>
 
@@ -38,7 +38,7 @@
         <h2 class="item__title">{{ product.name }}</h2>
         <div class="item__form">
           <form class="form" action="#" method="POST" @submit.prevent="doAddToCart">
-            <b class="item__price">{{ $filters.numberFormat(product.price) }} BYN</b>
+            <b class="item__price">{{ $filters.numberFormat(product.price) }} ₽</b>
 
             <fieldset class="form__block">
               <legend class="form__legend">Цвет:</legend>
@@ -51,7 +51,37 @@
                            :value="color.id"
                            v-model="currentColor"
                     >
-                    <span class="colors__value" :style="{ 'background-color': color.code }">
+                    <span class="colors__value" :style="{ 'background-color': color.color.code }">
+                    </span>
+                  </label>
+                </li>
+              </ul>
+            </fieldset>
+
+            <fieldset v-if="product.mainProp" class="form__block">
+              <legend class="form__legend">{{ product.title }}:</legend>
+              <ul class="sizes sizes--primery">
+                <li class="sizes__item">
+                  <label class="sizes__label">
+                    <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="32">
+                    <span class="sizes__value">
+                      32gb
+                    </span>
+                  </label>
+                </li>
+                <li class="sizes__item">
+                  <label class="sizes__label">
+                    <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="64">
+                    <span class="sizes__value">
+                      64gb
+                    </span>
+                  </label>
+                </li>
+                <li class="sizes__item">
+                  <label class="sizes__label">
+                    <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="128" checked="">
+                    <span class="sizes__value">
+                      128gb
                     </span>
                   </label>
                 </li>
@@ -87,6 +117,33 @@
           </form>
         </div>
       </div>
+
+      <div class="item__desc">
+        <ul class="tabs">
+          <li class="tabs__item" v-for="tab in productTabs" :key="tab.id">
+            <a href="#" class="tabs__link"
+               :class="{ 'tabs__link--current': tab.id === selectedTabId }"
+               @click.prevent="selectedTabId = tab.id"
+            >{{ tab.title }}</a>
+          </li>
+        </ul>
+
+        <div class="item__content">
+          <p v-if="selectedTabId === 1">
+            <span v-if="product.content?.length">{{ product.content }}</span>
+            <span v-else>К сожалению, описания к данному товару нет</span>
+          </p>
+
+          <div v-if="selectedTabId === 2">
+            <div v-if="product.specifications?.length">
+              <p v-for="specification in product.specifications" :key="specification.id">
+                <span style="font-weight: 600;">{{specification.title}}</span>: {{specification.value}}
+              </p>
+            </div>
+            <span v-else>К сожалению, характеристик к данному товару нет</span>
+          </div>
+        </div>
+      </div>
     </section>
   </main>
 </template>
@@ -101,6 +158,7 @@ import {
 } from 'vue';
 import { useRoute } from 'vue-router';
 import useProduct from '@/hooks/useProduct';
+import productTabs from '@/data/productPageTabs';
 
 export default defineComponent({
   components: {
@@ -120,6 +178,7 @@ export default defineComponent({
 
     const selectedColor = ref('');
     const amount = ref(1);
+    const selectedTabId = ref(1);
     const productAdded = ref(false);
     const productAddSending = ref(false);
 
@@ -137,8 +196,12 @@ export default defineComponent({
       productAddSending.value = true;
 
       $store.dispatch('addProductToCart', {
-        productId: product.value.id,
-        amount,
+        // productOfferId,
+        // colorId,
+        // amount
+
+        // productId: product.value.id,
+        // amount,
       })
         .then(() => {
           productAdded.value = true;
@@ -157,6 +220,7 @@ export default defineComponent({
 
     return {
       selectedColor,
+      selectedTabId,
       amount,
       productData: product,
       fetchStatus,
@@ -166,6 +230,7 @@ export default defineComponent({
       product,
       category,
       currentColor,
+      productTabs,
 
       doAddToCart,
     };

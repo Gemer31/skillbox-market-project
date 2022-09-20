@@ -9,7 +9,7 @@
     <section class="item">
       <div class="item__pics pics">
         <div class="pics__wrapper">
-          <img width="570" height="570" :src="product.image.file.url" :alt="product.name">
+          <img width="570" height="570" :src="product.preview.file.url" :alt="product.name">
         </div>
       </div>
 
@@ -17,7 +17,7 @@
         <span class="item__code">Артикул: {{ product.id }}</span>
         <h2 class="item__title">{{ product.name }}</h2>
         <div class="item__form">
-          <form class="form" action="#" method="POST" @submit.prevent="addToCart">
+          <form class="form" action="#" method="POST" @submit.prevent="doAddToCart">
             <b class="item__price">{{ $filters.numberFormat(product.price) }} BYN</b>
 
             <fieldset class="form__block">

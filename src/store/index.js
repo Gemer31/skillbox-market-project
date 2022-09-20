@@ -76,10 +76,10 @@ export default createStore({
           context.commit('syncCartProducts');
         });
     },
-    addProductToCart(context, { productId, amount }) {
+    addProductToCart(context, { productOfferId, colorId, amount }) {
       return axios.post(
         `${API_BASE_URL}/api/baskets/products`,
-        { productId, quantity: amount },
+        { productOfferId, colorId, quantity: amount },
         { params: { userAccessKey: context.state.userAccessKey } },
       )
         .then((response) => {

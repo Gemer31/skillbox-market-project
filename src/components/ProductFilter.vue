@@ -18,37 +18,59 @@
       <fieldset class="form__block">
         <legend class="form__legend">Категория</legend>
         <label for="categoriesSelectId" class="form__label form__label--select">
-          <select id="categoriesSelectId" class="form__select" type="text" name="category" v-model="currentCategoryId">
+          <select id="categoriesSelectId" class="form__select" type="text" name="category" v-model="categoryIdChanged">
             <option value="all">Все категории</option>
             <option :value="category.id" v-for="category in categories" :key="category.id">{{ category.title }}</option>
           </select>
         </label>
       </fieldset>
 
-      <fieldset class="form__block">
-        <legend class="form__legend">Цвет</legend>
-        <ul class="colors">
-          <li class="colors__item" v-for="color in colors" :key="color.id">
-            <label :for="color.id" class="colors__label">
-              <input :id="color.id"
-                     class="colors__radio sr-only"
-                     type="radio"
-                     name="color"
-                     :value="color.id"
-                     v-model="currentColorId"
-              >
-              <span class="colors__value" :style="{ 'background-color': color.code }"></span>
-            </label>
-          </li>
-        </ul>
-      </fieldset>
+<!--      <fieldset class="form__block">-->
+<!--        <legend class="form__legend">Цвет</legend>-->
+<!--        <ul class="colors">-->
+<!--          <li class="colors__item" v-for="color in colors" :key="color.id">-->
+<!--            <label :for="color.id" class="colors__label">-->
+<!--              <input :id="color.id"-->
+<!--                     class="colors__radio sr-only"-->
+<!--                     type="radio"-->
+<!--                     name="color"-->
+<!--                     :value="color.id"-->
+<!--                     v-model="currentColorId"-->
+<!--              >-->
+<!--              <span class="colors__value" :style="{ 'background-color': color.code }"></span>-->
+<!--            </label>-->
+<!--          </li>-->
+<!--        </ul>-->
+<!--      </fieldset>-->
+
+      <div v-if="categoryPropsLoading" class="props-loader"><DataLoader :width="70"/></div>
+      <div v-else-if="categoryProps?.length">
+        <fieldset class="form__block" v-for="prop in categoryProps" :key="prop.id">
+          <legend class="form__legend">{{prop.title}}</legend>
+          <ul class="check-list">
+            <li class="check-list__item" v-for="values in prop.availableValues" :key="values.value">
+              <label class="check-list__label">
+                <input class="check-list__check sr-only"
+                       type="checkbox"
+                       name="volume"
+                       :value="values.value"
+                >
+                <span class="check-list__desc">{{ values.value }}<span>({{ values.productsCount }})</span></span>
+              </label>
+            </li>
+          </ul>
+        </fieldset>
+      </div>
 
       <button class="filter__submit button button--primery" type="submit">
         Применить
       </button>
-      <button class="filter__reset button button--second" type="button" @click.prevent="reset">
-        Сбросить
-      </button>
+      <button
+        v-if="resetButtonVisible"
+        class="filter__reset button button--second"
+        type="button"
+        @click.prevent="reset"
+      >Сбросить</button>
     </form>
   </aside>
 </template>
@@ -56,17 +78,26 @@
 <script>
 import axios from 'axios';
 import API_BASE_URL from '@/config';
+import DataLoader from '@/components/DataLoader.vue';
 
 export default {
   name: 'ProductFilter',
   props: ['priceFrom', 'priceTo', 'categoryId', 'colorId', 'currentPage'],
+  components: {
+    DataLoader,
+  },
   data() {
     return {
       currentPriceFrom: 0,
       currentPriceTo: 0,
       currentCategoryId: 'all',
+      selectedCategoryProps: null,
       currentColorId: '',
 
+      categoryPropsLoading: false,
+      resetButtonVisible: false,
+
+      categoryProps: null,
       categoriesData: null,
       colorsData: null,
     };
@@ -79,6 +110,7 @@ export default {
       this.currentPriceTo = value;
     },
     categoryId(value) {
+      console.log('category: ', value);
       this.currentCategoryId = value;
     },
     colorId(value) {
@@ -99,6 +131,10 @@ export default {
       this.$emit('update:categoryId', 'all');
       this.$emit('update:colorId', '');
       this.$emit('update:currentPage', 1);
+
+      this.currentCategoryId = 'all';
+      this.currentCategoryProps = null;
+      this.resetButtonVisible = false;
     },
     loadCategories() {
       axios.get(`${API_BASE_URL}/api/productCategories`)
@@ -118,6 +154,28 @@ export default {
     this.loadColors();
   },
   computed: {
+    categoryIdChanged: {
+      get() {
+        return this.currentCategoryId;
+      },
+      set(value) {
+        if (value !== this.currentCategoryId) {
+          if (value !== 'all') {
+            this.categoryPropsLoading = true;
+
+            axios.get(`${API_BASE_URL}/api/productCategories/${value}`)
+              .then((response) => {
+                this.categoryProps = response.data.productProps;
+                this.categoryPropsLoading = false;
+              });
+          } else {
+            this.categoryProps = null;
+          }
+        }
+        this.currentCategoryId = value;
+        this.resetButtonVisible = value !== 'all';
+      },
+    },
     colors() {
       return this.colorsData ? this.colorsData.items : [];
     },
@@ -129,5 +187,8 @@ export default {
 </script>
 
 <style scoped>
-
+.props-loader {
+  display: flex;
+  margin-bottom: 20px;
+}
 </style>

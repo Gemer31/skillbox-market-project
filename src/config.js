@@ -1,1 +1,1 @@
-export default 'https://vue-study.skillbox.cc';
+export default 'https://vue-tzr.skillbox.cc';

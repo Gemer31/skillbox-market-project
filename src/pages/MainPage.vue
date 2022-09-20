@@ -19,10 +19,11 @@
       />
       <section class="catalog">
 
-        <DataLoader v-if="productsLoading" :width="200" :height="200" />
+        <DataLoader v-if="productsLoading" :width="200" :height="200"/>
         <DataLoadingError v-if="productsLoadingFailed" :svg-height="100" :svg-width="100"/>
 
-        <ProductList :products="products"/>
+        <ProductsEmptyList v-if="! productsLoading && !productsLoadingFailed && products?.length === 0"/>
+        <ProductList v-if="!productsLoading && !productsLoadingFailed" :products="products"/>
 
         <PaginationBar
           v-if="products.length"
@@ -41,6 +42,7 @@ import PaginationBar from '@/components/PaginationBar.vue';
 import ProductFilter from '@/components/ProductFilter.vue';
 import DataLoader from '@/components/DataLoader.vue';
 import DataLoadingError from '@/components/DataLoadingError.vue';
+import ProductsEmptyList from '@/components/ProductsEmptyList.vue';
 import axios from 'axios';
 import API_BASE_URL from '@/config';
 
@@ -52,12 +54,13 @@ export default {
     ProductFilter,
     DataLoader,
     DataLoadingError,
+    ProductsEmptyList,
   },
   data() {
     return {
       filterPriceFrom: 0,
       filterPriceTo: 0,
-      filterCategoryId: 'all',
+      filterCategoryId: null,
       filterColorId: '',
       currentPage: 1,
       productsPerPage: 3,
@@ -73,7 +76,7 @@ export default {
         ? this.productsData.items.map((product) => (
           {
             ...product,
-            image: product.image.file.url,
+            image: product.preview.file.url,
           }
         ))
         : [];
@@ -86,17 +89,29 @@ export default {
     loadProduts() {
       this.productsLoading = true;
       clearTimeout(this.loadProductsTimer);
+
+      const params = {
+        page: this.currentPage,
+        limit: this.productsPerPage,
+      };
+
+      if (this.filterPriceFrom && this.filterPriceFrom !== 0) {
+        params.minPrice = this.filterPriceFrom;
+      }
+
+      if (this.filterPriceTo && this.filterPriceTo !== 0) {
+        params.maxPrice = this.filterPriceTo;
+      }
+
+      if (this.filterCategoryId !== 'all') {
+        params.categoryId = this.filterCategoryId;
+      }
+      // if (this.filterColorId) {
+      //   params.colorId = this.filterColorId;
+      // }
+
       this.loadProductsTimer = setTimeout(() => {
-        axios.get(`${API_BASE_URL}/api/products`, {
-          params: {
-            page: this.currentPage,
-            limit: this.productsPerPage,
-            categoryId: this.filterCategoryId,
-            colorId: this.filterColorId,
-            minPrice: this.filterPriceFrom,
-            maxPrice: this.filterPriceTo,
-          },
-        })
+        axios.get(`${API_BASE_URL}/api/products`, { params })
           .then((response) => {
             this.productsData = response.data;
           })
