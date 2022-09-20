@@ -39,7 +39,7 @@ export default createStore({
     },
     syncCartProducts(state) {
       state.cartProducts = state.cartProductsData.map((item) => ({
-        productId: item.product.id,
+        productId: item.productOffer.id, // или просто id
         amount: item.quantity,
       }));
     },
@@ -47,7 +47,7 @@ export default createStore({
   getters: {
     cartDetailProducts(state) {
       return state.cartProducts.map((item) => {
-        const { product } = state.cartProductsData.find((p) => p.product.id === item.productId);
+        const { product } = state.cartProductsData.find((p) => p.productOffer.id === item.productId); // или просто id
         return {
           ...item,
           product,
@@ -55,7 +55,7 @@ export default createStore({
       });
     },
     cartTotalPrice(state, getters) {
-      return getters.cartDetailProducts.reduce((result, item) => (item.product.price * item.amount) + result, 0);
+      return getters.cartDetailProducts.reduce((result, item) => (item.productId * item.amount) + result, 0);
     },
   },
   actions: {

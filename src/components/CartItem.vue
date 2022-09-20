@@ -1,7 +1,7 @@
 <template>
   <li class="cart__item product">
     <div class="product__pic">
-      <img :src="item.product.image.file.url" width="120" height="120" :alt="item.product.title">
+      <img :src="item.product.preview.file.url" width="120" height="120" :alt="item.product.title">
     </div>
     <h3 class="product__title">{{ item.product.title }}</h3>
     <span class="product__code">Артикул: {{ item.productId }}</span>

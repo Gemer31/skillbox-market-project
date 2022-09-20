@@ -32,7 +32,8 @@ export default {
       this.updateUserAccessKey(userAccessKey);
     }
     this.loadCart()
-      .catch(() => {
+      .catch((error) => {
+        console.log(error);
         this.cartLoadingFailed = true;
       })
       .then(() => {

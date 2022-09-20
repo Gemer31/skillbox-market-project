@@ -53,7 +53,7 @@ import DataLoadingError from '@/components/DataLoadingError.vue';
 
 export default {
   name: 'CartPage',
-  props: ['testMess', 'cartLoading', 'cartLoadingFailed'],
+  props: ['cartLoading', 'cartLoadingFailed'],
   components: {
     CartItem, DataLoader, DataLoadingError,
   },

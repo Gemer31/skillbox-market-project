@@ -4,9 +4,24 @@
       <h1 class="content__title">
         Каталог
       </h1>
-      <span class="content__info">
-        Найдено товаров: {{ countProducts }}
-      </span>
+
+      <div class="main-page__catalog-header">
+        <span class="content__info">Найдено товаров: {{ countProducts }}</span>
+          <ul class="colors">
+            <li class="colors__item pagination__link--arrow main-page__products-per-page-value"
+                :class="{ 'main-page__products-per-page-value__selected': value === productsPerPageChanged}"
+                v-for="(value) in productsPerPageValues"
+                :key="'products-per-page-' + value">
+              <label class="colors__label">
+                <input class="colors__radio sr-only"
+                       type="radio"
+                       :value="value"
+                       v-model="productsPerPageChanged"
+                >{{ value }}
+              </label>
+            </li>
+          </ul>
+      </div>
     </div>
 
     <div class="content__catalog">
@@ -63,7 +78,9 @@ export default {
       filterCategoryId: null,
       filterColorId: '',
       currentPage: 1,
+
       productsPerPage: 3,
+      productsPerPageValues: [3, 5, 7],
 
       productsData: null,
       productsLoading: false,
@@ -83,6 +100,15 @@ export default {
     },
     countProducts() {
       return this.productsData ? this.productsData.pagination.total : 0;
+    },
+    productsPerPageChanged: {
+      set(value) {
+        this.productsPerPage = value;
+      },
+      get() {
+        this.loadProduts();
+        return this.productsPerPage;
+      },
     },
   },
   methods: {
@@ -148,5 +174,18 @@ export default {
 </script>
 
 <style scoped>
+.main-page__catalog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 
+.main-page__products-per-page-value {
+  padding: 0 5px;
+}
+
+.main-page__products-per-page-value__selected {
+  background-color: #9eff00;
+  font-weight: 600;
+}
 </style>
