@@ -17,14 +17,14 @@
       </ul>
 
       <h1 class="content__title">Корзина</h1>
-      <span class="content__info">Количество товаров: {{ products.length }}</span>
+      <span class="content__info">Количество товаров: {{ cartItems.length }}</span>
     </div>
 
     <section class="cart">
       <form class="cart__form form" action="#" method="POST">
         <div class="cart__field">
           <ul class="cart__list">
-            <CartItem v-for="item in products" :key="item.productId" :item="item"/>
+            <CartItem v-for="item in cartItems" :key="item.id" :item="item"/>
           </ul>
         </div>
 
@@ -37,7 +37,7 @@
           </p>
 
           <router-link v-slot="{ navigate }" :to="{ name: 'order' }" custom>
-            <button class="cart__button button button--primery" type="submit" :disabled="!products.length" @click="navigate" >Оформить заказ</button>
+            <button class="cart__button button button--primery" type="submit" :disabled="!cartItems.length" @click="navigate" >Оформить заказ</button>
           </router-link>
         </div>
       </form>
@@ -63,7 +63,7 @@ export default {
   },
   computed: {
     ...mapGetters({
-      products: 'cartDetailProducts',
+      cartItems: 'cartDetailProducts',
       totalPrice: 'cartTotalPrice',
     }),
   },

@@ -35,54 +35,44 @@
 
       <div class="item__info">
         <span class="item__code">Артикул: {{ product.id }}</span>
-        <h2 class="item__title">{{ product.name }}</h2>
+        <h2 class="item__title">{{ productOffer.title || product.name }}</h2>
         <div class="item__form">
           <form class="form" action="#" method="POST" @submit.prevent="doAddToCart">
-            <b class="item__price">{{ $filters.numberFormat(product.price) }} ₽</b>
+            <b class="item__price">{{ $filters.numberFormat(productOffer.price || product.price) }} ₽</b>
 
             <fieldset class="form__block">
               <legend class="form__legend">Цвет:</legend>
               <ul class="colors">
-                <li class="colors__item" v-for="color in product.colors" :key="product.id + '-' + color.id">
-                  <label :for="product.id + '-' + color.id" class="colors__label">
+                <li class="colors__item"
+                    v-for="color in product.colors"
+                    :key="color.id"
+                >
+                  <label class="colors__label">
                     <input class="colors__radio sr-only"
                            type="radio"
-                           :id="product.id + '-' + colorId"
                            :value="color.id"
-                           v-model="currentColor"
+                           v-model="selectedColorId"
                     >
-                    <span class="colors__value" :style="{ 'background-color': color.color.code }">
-                    </span>
+                    <span class="colors__value" :style="{ 'background-color': color.color.code }"></span>
                   </label>
                 </li>
               </ul>
             </fieldset>
 
             <fieldset v-if="product.mainProp" class="form__block">
-              <legend class="form__legend">{{ product.title }}:</legend>
+              <legend class="form__legend">{{ product.mainProp.title }}:</legend>
               <ul class="sizes sizes--primery">
-                <li class="sizes__item">
+                <li class="sizes__item"
+                    v-for="offer in product.offers"
+                    :key="offer.id"
+                >
                   <label class="sizes__label">
-                    <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="32">
-                    <span class="sizes__value">
-                      32gb
-                    </span>
-                  </label>
-                </li>
-                <li class="sizes__item">
-                  <label class="sizes__label">
-                    <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="64">
-                    <span class="sizes__value">
-                      64gb
-                    </span>
-                  </label>
-                </li>
-                <li class="sizes__item">
-                  <label class="sizes__label">
-                    <input class="sizes__radio sr-only" type="radio" name="sizes-item" value="128" checked="">
-                    <span class="sizes__value">
-                      128gb
-                    </span>
+                    <input class="sizes__radio sr-only"
+                           type="radio"
+                           name="sizes-item"
+                           :value="offer.id"
+                           v-model="selectedOfferId"
+                    ><span class="sizes__value" :class="{ 'sizes__value-selected': selectedOfferId === offer.id }">{{ offer.propValues[0].value }}</span>
                   </label>
                 </li>
               </ul>
@@ -90,17 +80,17 @@
 
             <div class="item__row">
               <div class="form__counter">
-                <button type="button" aria-label="Убрать один товар" @click.prevent="amount = amount - 1">
+                <button type="button" aria-label="Убрать один товар" @click.prevent="quantity = quantity - 1">
                   <svg width="12" height="12" fill="currentColor">
                     <use xlink:href="#icon-minus"></use>
                   </svg>
                 </button>
 
-                <label :for="counter">
-                  <input id="counter" type="text" name="count" v-model.number="amount">
+                <label>
+                  <input type="text" name="count" v-model.number="quantity">
                 </label>
 
-                <button type="button" aria-label="Добавить один товар" @click.prevent="amount = amount + 1">
+                <button type="button" aria-label="Добавить один товар" @click.prevent="quantity = quantity + 1">
                   <svg width="12" height="12" fill="currentColor">
                     <use xlink:href="#icon-plus"></use>
                   </svg>
@@ -137,7 +127,7 @@
           <div v-if="selectedTabId === 2">
             <div v-if="product.specifications?.length">
               <p v-for="specification in product.specifications" :key="specification.id">
-                <span style="font-weight: 600;">{{specification.title}}</span>: {{specification.value}}
+                <span style="font-weight: 600;">{{ specification.title }}</span>: {{ specification.value }}
               </p>
             </div>
             <span v-else>К сожалению, характеристик к данному товару нет</span>
@@ -176,18 +166,28 @@ export default defineComponent({
       fetchStatus,
     } = useProduct();
 
-    const selectedColor = ref('');
-    const amount = ref(1);
+    const selectedColorId = ref();
+    const selectedOfferId = ref();
+    const quantity = ref(1);
     const selectedTabId = ref(1);
     const productAdded = ref(false);
     const productAddSending = ref(false);
 
-    const currentColor = computed({
+    // const currentColor = computed({
+    //   get() {
+    //     return selectedColor.value;
+    //   },
+    //   set(value) {
+    //     selectedColor.value = value;
+    //   },
+    // });
+
+    const productOffer = computed({
       get() {
-        return selectedColor.value;
+        return product.value.offers?.find((offer) => offer.id === selectedOfferId.value);
       },
       set(value) {
-        selectedColor.value = value;
+        selectedOfferId.value = value;
       },
     });
 
@@ -196,12 +196,9 @@ export default defineComponent({
       productAddSending.value = true;
 
       $store.dispatch('addProductToCart', {
-        // productOfferId,
-        // colorId,
-        // amount
-
-        // productId: product.value.id,
-        // amount,
+        productOfferId: selectedOfferId.value,
+        colorId: selectedColorId.value,
+        quantity: quantity.value,
       })
         .then(() => {
           productAdded.value = true;
@@ -217,19 +214,26 @@ export default defineComponent({
         fetchProduct(value);
       }
     }, { immediate: true });
+    watch(() => product.value, (productValue) => {
+      if (productValue) {
+        selectedOfferId.value = productValue.offers?.[0]?.id;
+        selectedColorId.value = productValue.colors?.[0]?.id;
+      }
+    }, { immediate: true });
 
     return {
-      selectedColor,
+      selectedColorId,
       selectedTabId,
-      amount,
+      quantity,
       productData: product,
       fetchStatus,
       productAdded,
       productAddSending,
 
       product,
+      selectedOfferId,
+      productOffer,
       category,
-      currentColor,
       productTabs,
 
       doAddToCart,
@@ -239,6 +243,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.sizes__value-selected {
+  font-weight: 500;
+  color: #8BE000;
+}
+
 .product-data-loader {
   display: flex;
 }

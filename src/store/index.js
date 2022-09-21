@@ -5,7 +5,6 @@ import API_BASE_URL from '@/config';
 export default createStore({
   state() {
     return {
-      cartProducts: [],
       userAccessKey: null,
       cartProductsData: [],
       orderInfo: null,
@@ -16,16 +15,12 @@ export default createStore({
       state.orderInfo = orderInfo;
     },
     resetCart(state) {
-      state.cartProducts = [];
       state.cartProductsData = [];
     },
-    updateCartProductAmount(state, {
-      productId,
-      amount,
-    }) {
-      const cartItem = state.cartProducts.find((item) => item.productId === productId);
+    updateCartProductAmount(state, { basketItemId, quantity }) {
+      const cartItem = state.cartProductsData.find((item) => item.id === basketItemId);
       if (cartItem) {
-        cartItem.amount = amount;
+        cartItem.quantity = quantity;
       }
     },
     deleteCartProduct(state, { productId }) {
@@ -37,25 +32,13 @@ export default createStore({
     updateCartProductsData(state, items) {
       state.cartProductsData = items;
     },
-    syncCartProducts(state) {
-      state.cartProducts = state.cartProductsData.map((item) => ({
-        productId: item.productOffer.id, // или просто id
-        amount: item.quantity,
-      }));
-    },
   },
   getters: {
     cartDetailProducts(state) {
-      return state.cartProducts.map((item) => {
-        const { product } = state.cartProductsData.find((p) => p.productOffer.id === item.productId); // или просто id
-        return {
-          ...item,
-          product,
-        };
-      });
+      return state.cartProductsData.items;
     },
     cartTotalPrice(state, getters) {
-      return getters.cartDetailProducts.reduce((result, item) => (item.productId * item.amount) + result, 0);
+      return getters.cartDetailProducts.reduce((result, item) => (item.price * item.quantity) + result, 0);
     },
   },
   actions: {
@@ -72,39 +55,37 @@ export default createStore({
             localStorage.setItem('userAccessKey', response.data.user.accessKey);
             context.commit('updateUserAccessKey', response.data.user.accessKey);
           }
-          context.commit('updateCartProductsData', response.data.items);
-          context.commit('syncCartProducts');
+          context.commit('updateCartProductsData', response.data);
         });
     },
-    addProductToCart(context, { productOfferId, colorId, amount }) {
+    addProductToCart(context, payload) {
       return axios.post(
         `${API_BASE_URL}/api/baskets/products`,
-        { productOfferId, colorId, quantity: amount },
+        payload,
         { params: { userAccessKey: context.state.userAccessKey } },
       )
         .then((response) => {
           context.commit('updateCartProductsData', response.data.items);
-          context.commit('syncCartProducts');
         });
     },
-    updateCartProductAmount(context, { productId, amount }) {
-      context.commit('updateCartProductAmount', { productId, amount });
+    updateCartProductAmount(context, { basketItemId, quantity }) {
+      context.commit('updateCartProductAmount', { basketItemId, quantity });
 
-      if (amount < 1) {
+      if (quantity < 1) {
         return;
       }
 
       // eslint-disable-next-line consistent-return
       return axios.put(
         `${API_BASE_URL}/api/baskets/products`,
-        { productId, quantity: amount },
+        { basketItemId, quantity },
         { params: { userAccessKey: context.state.userAccessKey } },
       )
         .then((response) => {
           context.commit('updateCartProductsData', response.data.items);
         })
         .catch(() => {
-          context.commit('syncCartProducts');
+          // context.commit('syncCartProducts');
         });
     },
     deleteProductFromCart(context, { productId }) {
@@ -118,7 +99,7 @@ export default createStore({
           context.commit('updateCartProductsData', response.data.items);
         })
         .catch(() => {
-          context.commit('syncCartProducts');
+          // context.commit('syncCartProducts');
         });
     },
   },
