@@ -18,7 +18,7 @@
         <h2 class="item__title">{{ product.name }}</h2>
         <div class="item__form">
           <form class="form" action="#" method="POST" @submit.prevent="doAddToCart">
-            <b class="item__price">{{ $filters.numberFormat(product.price) }} BYN</b>
+            <b class="item__price">{{ $filters.numberFormat(product.price) }} ₽</b>
 
             <fieldset class="form__block">
               <legend class="form__legend">Цвет:</legend>

@@ -22,7 +22,10 @@
 
     <section class="cart">
       <form class="cart__form form" action="#" method="POST">
-        <div class="cart__field">
+        <div v-if="cartItems.length === 0" class="cart__field">
+          <ProductsEmptyList>Корзина пуста</ProductsEmptyList>
+        </div>
+        <div class="cart__field" v-else>
           <ul class="cart__list">
             <CartItem v-for="item in cartItems" :key="item.id" :item="item"/>
           </ul>
@@ -33,7 +36,7 @@
             Мы&nbsp;посчитаем стоимость доставки на&nbsp;следующем этапе
           </p>
           <p class="cart__price">
-            Итого: <span>{{ $filters.numberFormat(totalPrice) }} BYN</span>
+            Итого: <span>{{ $filters.numberFormat(totalPrice) }} ₽</span>
           </p>
 
           <router-link v-slot="{ navigate }" :to="{ name: 'order' }" custom>
@@ -50,12 +53,13 @@ import { mapGetters } from 'vuex';
 import CartItem from '@/components/CartItem.vue';
 import DataLoader from '@/components/DataLoader.vue';
 import DataLoadingError from '@/components/DataLoadingError.vue';
+import ProductsEmptyList from '@/components/ProductsEmptyList.vue';
 
 export default {
   name: 'CartPage',
   props: ['cartLoading', 'cartLoadingFailed'],
   components: {
-    CartItem, DataLoader, DataLoadingError,
+    CartItem, DataLoader, DataLoadingError, ProductsEmptyList,
   },
   data() {
     return {

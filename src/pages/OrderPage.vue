@@ -31,22 +31,38 @@
             <BaseFormTextarea title="Комментарий к заказу" placeholder="Ваши пожелания" v-model="formData.comment"
                               :error="formError.comment"/>
           </div>
+
+          <div class="cart__options">
+            <OrderOptionsBlock v-if="deliveryItems?.length"
+                               title="Доставка"
+                               :items="deliveryItems"
+                               :model-value="formData.deliveryTypeId"
+                               @update:model-value="deliveryChanged($event)"
+            />
+            <OrderOptionsBlock v-if="payItems?.length"
+                               title="Оплата"
+                               :items="payItems"
+                               v-model="formData.paymentTypeId"
+            />
+          </div>
         </div>
 
-        <div class="cart__block">
+        <div class="cart__block" v-if="cartItems">
           <ul class="cart__orders">
-            <li v-for="item in products" class="cart__order" :key="item.productId">
-              <h3>{{ item.product.title }} ({{ item.amount }}шт.)</h3>
-              <b>{{ item.product.price }} ₽</b>
-              <span>Артикул: {{ item.productId }}</span>
+            <li v-for="item in cartItems" class="cart__order" :key="item.id">
+              <h3>{{ item.productOffer.title }} ({{ item.quantity }} шт.)</h3>
+              <b>{{ item.price }} ₽</b>
+              <span>Артикул: {{ item.id }}</span>
             </li>
           </ul>
 
           <div class="cart__total">
-            <p>Итого: <b>{{ products.length }}</b> товара на сумму <b>{{ totalPrice }} ₽</b></p>
+            <p>Итого: <b>{{ cartItems.length }}</b> товара на сумму <b>{{ totalPrice }} ₽</b></p>
           </div>
 
-          <div v-if="formSending" class="order-sending"><DataLoader width="50" height="50"/></div>
+          <div v-if="formSending" class="order-sending">
+            <DataLoader width="50" height="50"/>
+          </div>
           <button v-else class="cart__button button button--primery" type="submit">Оформить заказ</button>
 
         </div>
@@ -62,6 +78,7 @@
 <script>
 import BaseFormText from '@/components/BaseFormText.vue';
 import BaseFormTextarea from '@/components/BaseFormTextarea.vue';
+import OrderOptionsBlock from '@/components/OrderOptionsBlock.vue';
 import DataLoader from '@/components/DataLoader.vue';
 import axios from 'axios';
 import API_BASE_URL from '@/config';
@@ -73,14 +90,45 @@ export default {
     BaseFormText,
     BaseFormTextarea,
     DataLoader,
+    OrderOptionsBlock,
   },
   data() {
     return {
+      deliveryItems: [
+        {
+          id: 1,
+          title: 'Самовывоз',
+          highlightedValue: 'бесплатно',
+        },
+        {
+          id: 2,
+          title: 'Курьером',
+          highlightedValue: '500 ₽',
+        },
+      ],
+      payItems: [
+        {
+          id: 1,
+          title: 'Картой при получении',
+        },
+        {
+          id: 2,
+          title: 'Наличными при получении',
+        },
+      ],
+
       formData: {},
       formError: {},
       formErrorMessage: '',
       formSending: false,
     };
+  },
+  created() {
+    axios.get(`${API_BASE_URL}/api/deliveries`)
+      .then((response) => {
+        this.deliveryItems = response.data;
+        this.formData.deliveryTypeId = this.deliveryItems[0].id;
+      });
   },
   methods: {
     order() {
@@ -107,10 +155,18 @@ export default {
           this.formSending = false;
         });
     },
+    deliveryChanged(value) {
+      console.log('!!!!!!!!!!!!!: ', value);
+      this.formData.deliveryTypeId = value;
+      axios.get(`${API_BASE_URL}/api/payments`, { params: { deliveryTypeId: value } })
+        .then((response) => {
+          this.payItems = response.data;
+        });
+    },
   },
   computed: {
     ...mapGetters({
-      products: 'cartDetailProducts',
+      cartItems: 'cartDetailProducts',
       totalPrice: 'cartTotalPrice',
     }),
   },

@@ -4,7 +4,7 @@
 
     <h3 class="catalog__title"><a href="#">{{ product.name }}</a></h3>
 
-    <span class="catalog__price">{{ $filters.numberFormat(product.price) }} BYN</span>
+    <span class="catalog__price">{{ $filters.numberFormat(product.price) }} ₽</span>
 
     <ul class="colors colors--black">
       <li class="colors__item" v-for="color in product.colors" :key="color.id">

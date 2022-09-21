@@ -37,7 +37,9 @@
         <DataLoader v-if="productsLoading" :width="200" :height="200"/>
         <DataLoadingError v-if="productsLoadingFailed" :svg-height="100" :svg-width="100"/>
 
-        <ProductsEmptyList v-if="! productsLoading && !productsLoadingFailed && products?.length === 0"/>
+        <ProductsEmptyList v-if="!productsLoading && !productsLoadingFailed && products?.length === 0">
+          Продукты для выбранного фильтра отсутствуют
+        </ProductsEmptyList>
         <ProductList v-if="!productsLoading && !productsLoadingFailed" :products="products"/>
 
         <PaginationBar

@@ -173,15 +173,6 @@ export default defineComponent({
     const productAdded = ref(false);
     const productAddSending = ref(false);
 
-    // const currentColor = computed({
-    //   get() {
-    //     return selectedColor.value;
-    //   },
-    //   set(value) {
-    //     selectedColor.value = value;
-    //   },
-    // });
-
     const productOffer = computed({
       get() {
         return product.value.offers?.find((offer) => offer.id === selectedOfferId.value);
