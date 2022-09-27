@@ -782,7 +782,7 @@ a {
     text-transform: uppercase
 }
 
-.cart__options:not(:last-child) {
+.cart__options div:not(:last-child) {
     margin-bottom: 40px
 }
 

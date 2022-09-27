@@ -3,17 +3,20 @@
     <div class="content__top">
       <ul class="breadcrumbs">
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="index.html">Каталог</a>
+          <router-link class="breadcrumbs__link" :to="{ name: 'main' }">
+            Каталог
+          </router-link>
         </li>
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="cart.html">Корзина</a>
+          <router-link class="breadcrumbs__link" :to="{ name: 'cart' }">
+            Корзина
+          </router-link>
         </li>
         <li class="breadcrumbs__item">
           <a class="breadcrumbs__link">Оформление заказа</a>
         </li>
       </ul>
-
-      <h1 class="content__title">Корзина</h1>
+      <h1 class="content__title">Оформление заказа</h1>
     </div>
 
     <section class="cart">
@@ -36,35 +39,36 @@
             <OrderOptionsBlock v-if="deliveryItems?.length"
                                title="Доставка"
                                :items="deliveryItems"
-                               :model-value="formData.deliveryTypeId"
+                               :modelValue="formData.deliveryTypeId"
                                @update:model-value="deliveryChanged($event)"
             />
             <OrderOptionsBlock v-if="payItems?.length"
                                title="Оплата"
                                :items="payItems"
-                               v-model="formData.paymentTypeId"
+                               v-model.number="formData.paymentTypeId"
             />
+            <DataLoader v-if="!deliveryItems || !payItems" width="50" height="50"/>
           </div>
         </div>
 
-        <div class="cart__block" v-if="cartItems">
-          <ul class="cart__orders">
+        <div class="cart__block">
+          <ul v-if="cartItems" class="cart__orders">
             <li v-for="item in cartItems" class="cart__order" :key="item.id">
               <h3>{{ item.productOffer.title }} ({{ item.quantity }} шт.)</h3>
               <b>{{ item.price }} ₽</b>
               <span>Артикул: {{ item.id }}</span>
             </li>
           </ul>
+          <DataLoader v-else width="50" height="50"/>
 
-          <div class="cart__total">
-            <p>Итого: <b>{{ cartItems.length }}</b> товара на сумму <b>{{ totalPrice }} ₽</b></p>
+          <div v-if="totalOffersQuantity" class="cart__total">
+            <p>Итого: <b>{{ totalOffersQuantity }}</b> товара на сумму <b>{{ totalPrice }} ₽</b></p>
           </div>
 
           <div v-if="formSending" class="order-sending">
             <DataLoader width="50" height="50"/>
           </div>
-          <button v-else class="cart__button button button--primery" type="submit">Оформить заказ</button>
-
+          <button v-else class="cart__button button button--primery" type="submit" :disabled="!cartItems?.length">Оформить заказ</button>
         </div>
         <div v-if="formErrorMessage" class="cart__error form__error-block">
           <h4>Заявка не отправлена!</h4>
@@ -94,46 +98,33 @@ export default {
   },
   data() {
     return {
-      deliveryItems: [
-        {
-          id: 1,
-          title: 'Самовывоз',
-          highlightedValue: 'бесплатно',
-        },
-        {
-          id: 2,
-          title: 'Курьером',
-          highlightedValue: '500 ₽',
-        },
-      ],
-      payItems: [
-        {
-          id: 1,
-          title: 'Картой при получении',
-        },
-        {
-          id: 2,
-          title: 'Наличными при получении',
-        },
-      ],
+      deliveryItems: null,
+      payItems: null,
 
       formData: {},
       formError: {},
-      formErrorMessage: '',
+      formErrorMessage: null,
       formSending: false,
     };
   },
   created() {
     axios.get(`${API_BASE_URL}/api/deliveries`)
       .then((response) => {
-        this.deliveryItems = response.data;
-        this.formData.deliveryTypeId = this.deliveryItems[0].id;
+        this.deliveryItems = response.data.map((item) => (
+          {
+            ...item,
+            highlightedValue: item.price === '0' ? 'бесплатно' : `${item.price} ₽`,
+          }
+        ));
+        this.deliveryChanged(this.deliveryItems[0].id);
       });
   },
   methods: {
     order() {
       this.formSending = true;
       this.formError = {};
+      this.formErrorMessage = null;
+
       axios.post(
         `${API_BASE_URL}/api/orders`,
         { ...this.formData },
@@ -156,11 +147,13 @@ export default {
         });
     },
     deliveryChanged(value) {
-      console.log('!!!!!!!!!!!!!: ', value);
+      this.payItems = null;
       this.formData.deliveryTypeId = value;
+
       axios.get(`${API_BASE_URL}/api/payments`, { params: { deliveryTypeId: value } })
         .then((response) => {
           this.payItems = response.data;
+          this.formData.paymentTypeId = this.payItems[0].id;
         });
     },
   },
@@ -169,6 +162,9 @@ export default {
       cartItems: 'cartDetailProducts',
       totalPrice: 'cartTotalPrice',
     }),
+    totalOffersQuantity() {
+      return this.cartItems?.reduce((result, item) => item.quantity + result, 0);
+    },
   },
 };
 </script>
@@ -178,5 +174,15 @@ export default {
   width: 100%;
   display: flex;
   margin-top: 20px;
+}
+
+.cart__block {
+  display: flex;
+  flex-direction: column;
+}
+
+.cart__options {
+  display: flex;
+  flex-direction: column;
 }
 </style>

@@ -9,14 +9,14 @@
     <div class="content__top">
       <ul class="breadcrumbs">
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="index.html">
+          <router-link class="breadcrumbs__link" :to="{ name: 'main' }">
             Каталог
-          </a>
+          </router-link>
         </li>
         <li class="breadcrumbs__item">
-          <a class="breadcrumbs__link" href="cart.html">
+          <router-link class="breadcrumbs__link" :to="{ name: 'cart' }">
             Корзина
-          </a>
+          </router-link>
         </li>
         <li class="breadcrumbs__item">
           <a class="breadcrumbs__link">
@@ -26,7 +26,7 @@
       </ul>
 
       <h1 class="content__title">
-        Заказ оформлен <span>{{ orderInfo.basket.id }}</span>
+        Заказ оформлен <span>№ {{ orderInfo.id }}</span>
       </h1>
     </div>
 
@@ -39,21 +39,9 @@
           </p>
 
           <ul class="dictionary">
-            <li class="dictionary__item">
-              <span class="dictionary__key">Получатель</span>
-              <span class="dictionary__value">{{ orderInfo.name }}</span>
-            </li>
-            <li class="dictionary__item">
-              <span class="dictionary__key">Адрес доставки</span>
-              <span class="dictionary__value">{{ orderInfo.address }}</span>
-            </li>
-            <li class="dictionary__item">
-              <span class="dictionary__key">Телефон</span>
-              <span class="dictionary__value">{{ orderInfo.phone }}</span>
-            </li>
-            <li class="dictionary__item">
-              <span class="dictionary__key">Email</span>
-              <span class="dictionary__value">{{ orderInfo.email }}</span>
+            <li v-for="field in formFields" class="dictionary__item" :key="field.name">
+              <span class="dictionary__key">{{ field.title }}</span>
+              <span class="dictionary__value">{{ orderInfo[field.name] }}</span>
             </li>
           </ul>
         </div>
@@ -61,14 +49,16 @@
         <div class="cart__block">
           <ul class="cart__orders">
             <li v-for="item in orderInfo.basket.items" class="cart__order" :key="item.id">
-              <h3>{{ item.product.title }} ({{ item.quantity }} шт.)</h3>
-              <b>{{ $filters.numberFormat(item.product.price) }} ₽</b>
+              <h3>{{ item.productOffer.title }} ({{ item.quantity }} шт.)</h3>
+              <b>{{ $filters.numberFormat(item.price) }} ₽</b>
               <span>Артикул: {{ item.id }}</span>
             </li>
           </ul>
 
           <div class="cart__total">
-            <p>Итого: <b>{{ orderInfo.basket.items.length }}</b> товара на сумму <b>{{orderInfo.totalPrice }} ₽</b></p>
+            <p v-if="orderInfo.deliveryType.price === '0'">{{ orderInfo.deliveryType.title }}</p>
+            <p v-else>Доставка: <b>{{ orderInfo.deliveryType.price }} ₽</b></p>
+            <p>Итого: <b>{{ totalOffersQuantity }}</b> товара на сумму <b>{{ orderInfo.totalPrice }} ₽</b></p>
           </div>
         </div>
       </form>
@@ -91,6 +81,29 @@ export default {
     return {
       orderLoading: true,
       orderLoadingFailed: false,
+
+      formFields: [
+        {
+          title: 'Получатель',
+          name: 'name',
+        },
+        {
+          title: 'Адрес доставки',
+          name: 'address',
+        },
+        {
+          title: 'Телефон',
+          name: 'phone',
+        },
+        {
+          title: 'Email',
+          name: 'email',
+        },
+        {
+          title: 'Способ оплаты',
+          name: 'paymentType',
+        },
+      ],
     };
   },
   methods: {
@@ -99,6 +112,9 @@ export default {
   computed: {
     orderInfo() {
       return this.$store.state.orderInfo;
+    },
+    totalOffersQuantity() {
+      return this.orderInfo.basket.items?.reduce((result, item) => item.quantity + result, 0);
     },
   },
   created() {
