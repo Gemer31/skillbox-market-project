@@ -34,13 +34,14 @@
       />
       <section class="catalog">
 
-        <DataLoader v-if="productsLoading" :width="200" :height="200"/>
-        <DataLoadingError v-if="productsLoadingFailed" :svg-height="100" :svg-width="100"/>
-
-        <ProductsEmptyList v-if="!productsLoading && !productsLoadingFailed && products?.length === 0">
-          Продукты для выбранного фильтра отсутствуют
-        </ProductsEmptyList>
-        <ProductList v-if="!productsLoading && !productsLoadingFailed" :products="products"/>
+        <Transition name="fade" mode="out-in">
+          <DataLoader v-if="productsLoading" :width="200" :height="200"/>
+          <DataLoadingError v-else-if="productsLoadingFailed" :svg-height="100" :svg-width="100"/>
+          <ProductsEmptyList v-else-if="!productsLoading && !productsLoadingFailed && products?.length === 0">
+            Продукты для выбранного фильтра отсутствуют
+          </ProductsEmptyList>
+          <ProductList v-else-if="!productsLoading && !productsLoadingFailed" :products="products"/>
+        </Transition>
 
         <PaginationBar
           v-if="products.length"

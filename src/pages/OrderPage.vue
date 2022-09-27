@@ -36,44 +36,51 @@
           </div>
 
           <div class="cart__options">
-            <OrderOptionsBlock v-if="deliveryItems?.length"
-                               title="Доставка"
+            <OrderOptionsBlock title="Доставка"
                                :items="deliveryItems"
                                :modelValue="formData.deliveryTypeId"
                                @update:model-value="deliveryChanged($event)"
             />
-            <OrderOptionsBlock v-if="payItems?.length"
-                               title="Оплата"
+            <OrderOptionsBlock title="Оплата"
                                :items="payItems"
                                v-model.number="formData.paymentTypeId"
             />
-            <DataLoader v-if="!deliveryItems || !payItems" width="50" height="50"/>
           </div>
         </div>
 
         <div class="cart__block">
-          <ul v-if="cartItems" class="cart__orders">
-            <li v-for="item in cartItems" class="cart__order" :key="item.id">
-              <h3>{{ item.productOffer.title }} ({{ item.quantity }} шт.)</h3>
-              <b>{{ item.price }} ₽</b>
-              <span>Артикул: {{ item.id }}</span>
-            </li>
-          </ul>
-          <DataLoader v-else width="50" height="50"/>
+          <Transition name="fade" mode="out-in">
+            <ul v-if="cartItems" class="cart__orders">
+              <li v-for="item in cartItems" class="cart__order" :key="item.id">
+                <h3>{{ item.productOffer.title }} ({{ item.quantity }} шт.)</h3>
+                <b>{{ item.price }} ₽</b>
+                <span>Артикул: {{ item.id }}</span>
+              </li>
+            </ul>
+            <DataLoader v-else width="50" height="50"/>
+          </Transition>
 
-          <div v-if="totalOffersQuantity" class="cart__total">
-            <p>Итого: <b>{{ totalOffersQuantity }}</b> товара на сумму <b>{{ totalPrice }} ₽</b></p>
-          </div>
+          <Transition name="fade" mode="out-in" :duration="{ delay: 500 }">
+            <div v-if="totalOffersQuantity" class="cart__total">
+              <p>Итого: <b>{{ totalOffersQuantity }}</b> товара на сумму <b>{{ totalPrice }} ₽</b></p>
+            </div>
+          </Transition>
 
-          <div v-if="formSending" class="order-sending">
-            <DataLoader width="50" height="50"/>
+          <Transition name="fade" mode="out-in">
+            <div v-if="formSending" class="order-sending">
+              <DataLoader width="50" height="50"/>
+            </div>
+            <button v-else class="cart__button button button--primery" type="submit" :disabled="!cartItems?.length">
+              Оформить заказ
+            </button>
+          </Transition>
+        </div>
+        <Transition name="fade" mode="out-in">
+          <div v-if="formErrorMessage" class="cart__error form__error-block">
+            <h4>Заявка не отправлена!</h4>
+            <p>{{ formErrorMessage }}</p>
           </div>
-          <button v-else class="cart__button button button--primery" type="submit" :disabled="!cartItems?.length">Оформить заказ</button>
-        </div>
-        <div v-if="formErrorMessage" class="cart__error form__error-block">
-          <h4>Заявка не отправлена!</h4>
-          <p>{{ formErrorMessage }}</p>
-        </div>
+        </Transition>
       </form>
     </section>
   </main>

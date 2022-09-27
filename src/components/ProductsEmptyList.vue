@@ -28,7 +28,7 @@ export default {
 }
 
 .products-empty-list__text {
-  font-size: 2rem;
+  font-size: 1.5rem;
   flex-grow: 1;
   text-align: center;
 }

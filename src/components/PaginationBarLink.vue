@@ -32,7 +32,6 @@ export default {
         || (Math.abs(this.currentPage - this.pageNumber) <= 1);
     },
     showWithThreeDots() {
-      console.log('currentPage: ', this.currentPage, ', pageNumber: ', this.pageNumber, '; result: ', Math.abs(this.currentPage - this.pageNumber) === 2);
       return (this.currentPage === 1 && this.pageNumber === 4)
         || (this.currentPage === this.pages && this.pageNumber === this.pages - 3)
         || Math.abs(this.currentPage - this.pageNumber) === 2;

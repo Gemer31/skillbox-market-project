@@ -3,14 +3,17 @@
     <h2 class="filter__title">Фильтры</h2>
 
     <form class="filter__form form" action="#" method="get" @submit.prevent="submit">
+            <input type="text" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"/>
+
       <fieldset class="form__block">
         <legend class="form__legend">Цена</legend>
         <label for="priceFromId" class="form__label form__label--price">
-          <input id="priceFromId" class="form__input" type="text" name="min-price" v-model.number="currentPriceFrom">
+          <input id="priceFromId" class="form__input" type="text" name="min-price" :oninput="priceInputChanged(this)"
+                 v-model="priceFromChanged">
           <span class="form__value">От</span>
         </label>
         <label for="priceToId" class="form__label form__label--price">
-          <input id="priceToId" class="form__input" type="text" name="max-price" v-model.number="currentPriceTo">
+          <input id="priceToId" class="form__input" type="text" name="max-price" v-model.number="priceToChanged">
           <span class="form__value">До</span>
         </label>
       </fieldset>
@@ -25,28 +28,30 @@
         </label>
       </fieldset>
 
-<!--      <fieldset class="form__block">-->
-<!--        <legend class="form__legend">Цвет</legend>-->
-<!--        <ul class="colors">-->
-<!--          <li class="colors__item" v-for="color in colors" :key="color.id">-->
-<!--            <label :for="color.id" class="colors__label">-->
-<!--              <input :id="color.id"-->
-<!--                     class="colors__radio sr-only"-->
-<!--                     type="radio"-->
-<!--                     name="color"-->
-<!--                     :value="color.id"-->
-<!--                     v-model="currentColorId"-->
-<!--              >-->
-<!--              <span class="colors__value" :style="{ 'background-color': color.code }"></span>-->
-<!--            </label>-->
-<!--          </li>-->
-<!--        </ul>-->
-<!--      </fieldset>-->
+      <!--      <fieldset class="form__block">-->
+      <!--        <legend class="form__legend">Цвет</legend>-->
+      <!--        <ul class="colors">-->
+      <!--          <li class="colors__item" v-for="color in colors" :key="color.id">-->
+      <!--            <label :for="color.id" class="colors__label">-->
+      <!--              <input :id="color.id"-->
+      <!--                     class="colors__radio sr-only"-->
+      <!--                     type="radio"-->
+      <!--                     name="color"-->
+      <!--                     :value="color.id"-->
+      <!--                     v-model="currentColorId"-->
+      <!--              >-->
+      <!--              <span class="colors__value" :style="{ 'background-color': color.code }"></span>-->
+      <!--            </label>-->
+      <!--          </li>-->
+      <!--        </ul>-->
+      <!--      </fieldset>-->
 
-      <div v-if="categoryPropsLoading" class="props-loader"><DataLoader :width="70"/></div>
+      <div v-if="categoryPropsLoading" class="props-loader">
+        <DataLoader :width="70"/>
+      </div>
       <div v-else-if="categoryProps?.length">
         <fieldset class="form__block" v-for="prop in categoryProps" :key="prop.id">
-          <legend class="form__legend">{{prop.title}}</legend>
+          <legend class="form__legend">{{ prop.title }}</legend>
           <ul class="check-list">
             <li class="check-list__item" v-for="values in prop.availableValues" :key="values.value">
               <label class="check-list__label">
@@ -70,7 +75,8 @@
         class="filter__reset button button--second"
         type="button"
         @click.prevent="reset"
-      >Сбросить</button>
+      >Сбросить
+      </button>
     </form>
   </aside>
 </template>
@@ -118,6 +124,12 @@ export default {
     },
   },
   methods: {
+    priceInputChanged(input) {
+      console.log(input);
+      const preparedValue = Number(input.value.replace(/[^\d]/g, ''));
+      // eslint-disable-next-line no-param-reassign
+      input.value = preparedValue;
+    },
     submit() {
       this.$emit('update:priceFrom', this.currentPriceFrom);
       this.$emit('update:priceTo', this.currentPriceTo);
@@ -154,6 +166,29 @@ export default {
     this.loadColors();
   },
   computed: {
+    priceFromChanged: {
+      get() {
+        return this.currentPriceFrom;
+      },
+      set(value) {
+        const preparedValue = Number(value.replace(/[^\d]/g, ''));
+        this.currentPriceFrom = preparedValue > 0 ? preparedValue : 0;
+        if (preparedValue !== 0) {
+          this.resetButtonVisible = true;
+        }
+      },
+    },
+    priceToChanged: {
+      get() {
+        return this.currentPriceTo;
+      },
+      set(value) {
+        this.currentPriceTo = value;
+        if (value !== 0) {
+          this.resetButtonVisible = true;
+        }
+      },
+    },
     categoryIdChanged: {
       get() {
         return this.currentCategoryId;

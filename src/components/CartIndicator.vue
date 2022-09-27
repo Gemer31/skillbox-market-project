@@ -17,6 +17,11 @@ export default {
       cartItems: 'cartDetailProducts',
     }),
   },
+  watch: {
+    cartItem() {
+      console.log('trigger');
+    },
+  },
 };
 </script>
 
