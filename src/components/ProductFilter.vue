@@ -3,18 +3,25 @@
     <h2 class="filter__title">Фильтры</h2>
 
     <form class="filter__form form" action="#" method="get" @submit.prevent="submit">
-            <input type="text" oninput="this.value = this.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');"/>
-
       <fieldset class="form__block">
         <legend class="form__legend">Цена</legend>
-        <label for="priceFromId" class="form__label form__label--price">
-          <input id="priceFromId" class="form__input" type="text" name="min-price" :oninput="priceInputChanged(this)"
-                 v-model="priceFromChanged">
-          <span class="form__value">От</span>
+        <label class="form__label form__label--price">
+          <input class="form__input"
+                 ref="priceFrom"
+                 type="text"
+                 name="min-price"
+                 placeholder="Введите число"
+                 v-model.number="priceFromChanged"
+          ><span class="form__value">От</span>
         </label>
-        <label for="priceToId" class="form__label form__label--price">
-          <input id="priceToId" class="form__input" type="text" name="max-price" v-model.number="priceToChanged">
-          <span class="form__value">До</span>
+        <label class="form__label form__label--price">
+          <input class="form__input"
+                 ref="priceTo"
+                 type="text"
+                 name="max-price"
+                 placeholder="Введите число"
+                 v-model.number="priceToChanged"
+          ><span class="form__value">До</span>
         </label>
       </fieldset>
 
@@ -46,26 +53,28 @@
       <!--        </ul>-->
       <!--      </fieldset>-->
 
-      <div v-if="categoryPropsLoading" class="props-loader">
-        <DataLoader :width="70"/>
-      </div>
-      <div v-else-if="categoryProps?.length">
-        <fieldset class="form__block" v-for="prop in categoryProps" :key="prop.id">
-          <legend class="form__legend">{{ prop.title }}</legend>
-          <ul class="check-list">
-            <li class="check-list__item" v-for="values in prop.availableValues" :key="values.value">
-              <label class="check-list__label">
-                <input class="check-list__check sr-only"
-                       type="checkbox"
-                       name="volume"
-                       :value="values.value"
-                >
-                <span class="check-list__desc">{{ values.value }}<span>({{ values.productsCount }})</span></span>
-              </label>
-            </li>
-          </ul>
-        </fieldset>
-      </div>
+      <Transition name="fade" mode="out-in">
+        <div v-if="categoryPropsLoading" class="props-loader">
+          <DataLoader :width="70"/>
+        </div>
+        <div v-else-if="currentCategoryProps?.length">
+          <fieldset class="form__block" v-for="prop in currentCategoryProps" :key="prop.id">
+            <legend class="form__legend">{{ prop.title }}</legend>
+            <ul class="check-list">
+              <li class="check-list__item" v-for="values in prop.availableValues" :key="values.value">
+                <label class="check-list__label">
+                  <input class="check-list__check sr-only"
+                         type="checkbox"
+                         name="volume"
+                         :value="values.value"
+                  >
+                  <span class="check-list__desc">{{ values.value }}<span>({{ values.productsCount }})</span></span>
+                </label>
+              </li>
+            </ul>
+          </fieldset>
+        </div>
+      </Transition>
 
       <button class="filter__submit button button--primery" type="submit">
         Применить
@@ -88,14 +97,14 @@ import DataLoader from '@/components/DataLoader.vue';
 
 export default {
   name: 'ProductFilter',
-  props: ['priceFrom', 'priceTo', 'categoryId', 'colorId', 'currentPage'],
+  props: ['priceFrom', 'priceTo', 'categoryId', 'colorId', 'categoryProps', 'currentPage'],
   components: {
     DataLoader,
   },
   data() {
     return {
-      currentPriceFrom: 0,
-      currentPriceTo: 0,
+      currentPriceFrom: null,
+      currentPriceTo: null,
       currentCategoryId: 'all',
       selectedCategoryProps: null,
       currentColorId: '',
@@ -103,7 +112,7 @@ export default {
       categoryPropsLoading: false,
       resetButtonVisible: false,
 
-      categoryProps: null,
+      currentCategoryProps: null,
       categoriesData: null,
       colorsData: null,
     };
@@ -124,12 +133,12 @@ export default {
     },
   },
   methods: {
-    priceInputChanged(input) {
-      console.log(input);
-      const preparedValue = Number(input.value.replace(/[^\d]/g, ''));
-      // eslint-disable-next-line no-param-reassign
-      input.value = preparedValue;
-    },
+    // priceInputChanged(input) {
+    //   // console.log(input);
+    //   // const preparedValue = Number(input.value.replace(/[^\d]/g, ''));
+    //   // // eslint-disable-next-line no-param-reassign
+    //   // input.value = preparedValue;
+    // },
     submit() {
       this.$emit('update:priceFrom', this.currentPriceFrom);
       this.$emit('update:priceTo', this.currentPriceTo);
@@ -138,8 +147,8 @@ export default {
       this.$emit('update:currentPage', 1);
     },
     reset() {
-      this.$emit('update:priceFrom', 0);
-      this.$emit('update:priceTo', 0);
+      this.$emit('update:priceFrom', null);
+      this.$emit('update:priceTo', null);
       this.$emit('update:categoryId', 'all');
       this.$emit('update:colorId', '');
       this.$emit('update:currentPage', 1);
@@ -160,6 +169,9 @@ export default {
           this.colorsData = response.data;
         });
     },
+    convertToNumbersOnly(value) {
+      return value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+    },
   },
   created() {
     this.loadCategories();
@@ -170,23 +182,20 @@ export default {
       get() {
         return this.currentPriceFrom;
       },
-      set(value) {
-        const preparedValue = Number(value.replace(/[^\d]/g, ''));
-        this.currentPriceFrom = preparedValue > 0 ? preparedValue : 0;
-        if (preparedValue !== 0) {
-          this.resetButtonVisible = true;
-        }
+      set() {
+        this.$refs.priceFrom.value = this.convertToNumbersOnly(this.$refs.priceFrom.value);
+        this.currentPriceFrom = this.$refs.priceFrom.value;
+        this.resetButtonVisible = +this.currentPriceFrom !== 0;
       },
     },
     priceToChanged: {
       get() {
         return this.currentPriceTo;
       },
-      set(value) {
-        this.currentPriceTo = value;
-        if (value !== 0) {
-          this.resetButtonVisible = true;
-        }
+      set() {
+        this.$refs.priceTo.value = this.convertToNumbersOnly(this.$refs.priceTo.value);
+        this.currentPriceTo = this.$refs.priceTo.value;
+        this.resetButtonVisible = +this.currentPriceTo !== 0;
       },
     },
     categoryIdChanged: {
@@ -200,11 +209,11 @@ export default {
 
             axios.get(`${API_BASE_URL}/api/productCategories/${value}`)
               .then((response) => {
-                this.categoryProps = response.data.productProps;
+                this.currentCategoryProps = response.data.productProps;
                 this.categoryPropsLoading = false;
               });
           } else {
-            this.categoryProps = null;
+            this.currentCategoryProps = null;
           }
         }
         this.currentCategoryId = value;

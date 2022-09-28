@@ -106,6 +106,7 @@
 
                 <Transition name="fade" mode="out-in">
                   <DataLoader v-if="productAddSending" :width="50" :height="50"/>
+                  <DataLoadingError v-else-if="productAddError" :svg-color="'red'" :no-message="true" :svg-height="50" :svg-width="50"/>
                   <DataProcessedSuccessfullyItem v-else-if="productAdded" :width="50" :height="50"/>
                 </Transition>
               </div>
@@ -179,6 +180,7 @@ export default defineComponent({
     const selectedTabId = ref(1);
     const productAdded = ref(false);
     const productAddSending = ref(false);
+    const productAddError = ref(false);
 
     const productOffer = computed({
       get() {
@@ -192,12 +194,16 @@ export default defineComponent({
     const doAddToCart = () => {
       productAdded.value = false;
       productAddSending.value = true;
+      productAddError.value = false;
 
       $store.dispatch('addProductToCart', {
         productOfferId: selectedOfferId.value,
         colorId: selectedColorId.value,
         quantity: quantity.value,
       })
+        .catch(() => {
+          productAddError.value = true;
+        })
         .then(() => {
           productAdded.value = true;
           productAddSending.value = false;
@@ -225,8 +231,10 @@ export default defineComponent({
       quantity,
       productData: product,
       fetchStatus,
+
       productAdded,
       productAddSending,
+      productAddError,
 
       product,
       selectedOfferId,

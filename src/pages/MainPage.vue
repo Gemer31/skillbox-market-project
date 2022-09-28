@@ -76,8 +76,8 @@ export default {
   },
   data() {
     return {
-      filterPriceFrom: 0,
-      filterPriceTo: 0,
+      filterPriceFrom: null,
+      filterPriceTo: null,
       filterCategoryId: null,
       filterColorId: '',
       currentPage: 1,
