@@ -119,13 +119,12 @@ export default {
   },
   watch: {
     priceFrom(value) {
-      this.currentPriceFrom = value;
+      this.priceFromChanged = value;
     },
     priceTo(value) {
-      this.currentPriceTo = value;
+      this.priceToChanged = value;
     },
     categoryId(value) {
-      console.log('category: ', value);
       this.currentCategoryId = value;
     },
     colorId(value) {
@@ -153,6 +152,8 @@ export default {
       this.$emit('update:colorId', '');
       this.$emit('update:currentPage', 1);
 
+      this.currentPriceFrom = null;
+      this.currentPriceTo = null;
       this.currentCategoryId = 'all';
       this.currentCategoryProps = null;
       this.resetButtonVisible = false;

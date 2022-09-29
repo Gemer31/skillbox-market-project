@@ -1,4 +1,5 @@
 <template>
+  <SnackBar/>
   <HeaderView :cart-loading="cartLoading" :cart-loading-failed="cartLoadingFailed"/>
   <router-view :cart-loading="cartLoading" :cart-loading-failed="cartLoadingFailed" />
   <FooterView/>
@@ -9,6 +10,7 @@
 <script>
 import HeaderView from '@/components/HeaderView.vue';
 import FooterView from '@/components/FooterView.vue';
+import SnackBar from '@/components/SnackBar.vue';
 import { mapActions, mapMutations } from 'vuex';
 
 export default {
@@ -16,6 +18,7 @@ export default {
   components: {
     HeaderView,
     FooterView,
+    SnackBar,
   },
   data() {
     return {

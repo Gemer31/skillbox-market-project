@@ -5,23 +5,23 @@
         Каталог
       </h1>
 
-      <div class="main-page__catalog-header">
-        <span class="content__info">Найдено товаров: {{ countProducts }}</span>
-          <ul class="colors">
-            <li class="colors__item pagination__link--arrow main-page__products-per-page-value"
-                :class="{ 'main-page__products-per-page-value__selected': value === productsPerPageChanged}"
-                v-for="(value) in productsPerPageValues"
-                :key="'products-per-page-' + value">
-              <label class="colors__label">
-                <input class="colors__radio sr-only"
-                       type="radio"
-                       :value="value"
-                       v-model="productsPerPageChanged"
-                >{{ value }}
-              </label>
-            </li>
-          </ul>
-      </div>
+<!--      <div class="main-page__catalog-header">-->
+<!--        <span class="content__info">Найдено товаров: {{ countProducts }}</span>-->
+<!--          <ul class="colors">-->
+<!--            <li class="colors__item pagination__link&#45;&#45;arrow main-page__products-per-page-value"-->
+<!--                :class="{ 'main-page__products-per-page-value__selected': value === productsPerPageChanged}"-->
+<!--                v-for="(value) in productsPerPageValues"-->
+<!--                :key="'products-per-page-' + value">-->
+<!--              <label class="colors__label">-->
+<!--                <input class="colors__radio sr-only"-->
+<!--                       type="radio"-->
+<!--                       :value="value"-->
+<!--                       v-model="productsPerPageChanged"-->
+<!--                >{{ value }}-->
+<!--              </label>-->
+<!--            </li>-->
+<!--          </ul>-->
+<!--      </div>-->
     </div>
 
     <div class="content__catalog">
@@ -106,6 +106,7 @@ export default {
     },
     productsPerPageChanged: {
       set(value) {
+        this.currentPage = 1;
         this.productsPerPage = value;
       },
       get() {
@@ -177,18 +178,18 @@ export default {
 </script>
 
 <style scoped>
-.main-page__catalog-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+/*.main-page__catalog-header {*/
+/*  display: flex;*/
+/*  justify-content: space-between;*/
+/*  align-items: center;*/
+/*}*/
 
-.main-page__products-per-page-value {
-  padding: 0 5px;
-}
+/*.main-page__products-per-page-value {*/
+/*  padding: 0 5px;*/
+/*}*/
 
-.main-page__products-per-page-value__selected {
-  background-color: #9eff00;
-  font-weight: 600;
-}
+/*.main-page__products-per-page-value__selected {*/
+/*  background-color: #9eff00;*/
+/*  font-weight: 600;*/
+/*}*/
 </style>

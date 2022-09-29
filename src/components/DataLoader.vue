@@ -1,5 +1,7 @@
 <template>
-  <svg class="data-loader" xmlns="http://www.w3.org/2000/svg" :width="width" :height="height" viewBox="0 0 100 100" overflow="visible" fill="#9eff00">
+  <svg class="data-loader" xmlns="http://www.w3.org/2000/svg" :width="width" :height="height" viewBox="0 0 100 100" overflow="visible"
+       :style="{ 'fill': color || '#9eff00' }"
+  >
     <defs>
       <rect id="spinner" x="46.5" y="40" width="7" height="20" rx="2" ry="2" transform="translate(0 -30)"></rect>
     </defs>
@@ -69,7 +71,7 @@
 <script>
 export default {
   name: 'DataLoader',
-  props: ['width', 'height'],
+  props: ['width', 'height', 'color'],
 };
 </script>
 
