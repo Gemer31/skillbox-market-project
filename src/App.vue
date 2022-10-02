@@ -1,7 +1,8 @@
 <template>
-  <SnackBar/>
+  <SnackBar class="snack"/>
+
   <HeaderView :cart-loading="cartLoading" :cart-loading-failed="cartLoadingFailed"/>
-  <router-view :cart-loading="cartLoading" :cart-loading-failed="cartLoadingFailed" />
+  <router-view :cart-loading="cartLoading" :cart-loading-failed="cartLoadingFailed"/>
   <FooterView/>
 
   <div id="teleport-target"></div>
@@ -49,3 +50,6 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+</style>

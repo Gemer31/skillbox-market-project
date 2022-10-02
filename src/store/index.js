@@ -92,7 +92,7 @@ export default createStore({
       context.commit('deleteCartProduct', payload);
 
       return axios.delete(
-        `${API_BASE_URL}/api/baskets/produаcts`,
+        `${API_BASE_URL}/api/baskets/products`,
         { data: payload, params: { userAccessKey: context.state.userAccessKey } },
       )
         .then((response) => {
