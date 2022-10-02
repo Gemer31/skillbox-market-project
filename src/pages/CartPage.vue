@@ -29,9 +29,12 @@
               <ProductsEmptyList>Корзина пуста</ProductsEmptyList>
             </div>
             <div class="cart__field" v-else>
-              <ul class="cart__list">
+              <TransitionGroup tag="ul"
+                               name="fade-group"
+                               mode="out-in"
+              >
                 <CartItem v-for="item in cartItems" :key="item.id" :item="item"/>
-              </ul>
+              </TransitionGroup>
             </div>
           </Transition>
 
@@ -86,5 +89,18 @@ export default {
 <style scoped>
 .cart-data-loader {
   display: flex;
+}
+
+.fade-group-leave-active {
+  transition: max-height 0.15s linear;
+}
+
+.fade-group-leave-from {
+  max-height: 220px;
+}
+
+.fade-group-leave-to {
+  max-height: 0;
+  margin-bottom: 0;
 }
 </style>

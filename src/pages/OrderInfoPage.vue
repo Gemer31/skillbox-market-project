@@ -1,9 +1,9 @@
 <template>
   <Transition name="fade" mode="out-in">
-    <main v-if="orderLoading" class="content container product-data-loader">
+    <main v-if="orderLoading" class="content container order-info-loader">
       <DataLoader :width="200" :height="200"/>
     </main>
-    <main v-else-if="orderLoadingFailed" class="content container product-data-loader">
+    <main v-else-if="orderLoadingFailed" class="content container order-info-loader">
       <DataLoadingError :svg-height="100" :svg-width="100"/>
     </main>
     <main class="content container" v-else>
@@ -59,8 +59,8 @@
             <div class="cart__total">
               <p v-if="orderInfo.deliveryType.price === '0'">{{ orderInfo.deliveryType.title }}</p>
               <p v-else>Доставка: <b>{{ $filters.numberFormat(orderInfo.deliveryType.price) }} ₽</b></p>
-              <p>Итого: <b>{{ totalOffersQuantity }}</b> товара на сумму
-                <b>{{ $filters.numberFormat(orderInfo.totalPrice) }} ₽</b></p>
+              <p>Количество товаров: <b>{{ totalOffersQuantity }}</b> шт.</p>
+              <p>Сумма: <b>{{ $filters.numberFormat(orderInfo.totalPrice) }} ₽</b></p>
             </div>
           </div>
         </form>
@@ -136,5 +136,7 @@ export default {
 </script>
 
 <style scoped>
-
+.order-info-loader {
+  display: flex;
+}
 </style>

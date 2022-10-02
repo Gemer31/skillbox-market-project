@@ -92,14 +92,11 @@ export default createStore({
       context.commit('deleteCartProduct', payload);
 
       return axios.delete(
-        `${API_BASE_URL}/api/baskets/products`,
+        `${API_BASE_URL}/api/baskets/produаcts`,
         { data: payload, params: { userAccessKey: context.state.userAccessKey } },
       )
         .then((response) => {
           context.commit('updateCartProductsData', response.data);
-        })
-        .catch(() => {
-          // context.commit('syncCartProducts');
         });
     },
   },

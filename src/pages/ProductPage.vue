@@ -143,7 +143,6 @@
       </section>
     </main>
   </Transition>
-
 </template>
 
 <script>
@@ -157,6 +156,7 @@ import {
 import { useRoute } from 'vue-router';
 import useProduct from '@/hooks/useProduct';
 import productTabs from '@/data/productPageTabs';
+import eventBus from '@/eventBus';
 
 export default defineComponent({
   components: {
@@ -201,8 +201,9 @@ export default defineComponent({
         colorId: selectedColorId.value,
         quantity: quantity.value,
       })
-        .catch(() => {
+        .catch((error) => {
           productAddError.value = true;
+          eventBus.$emit('showSnack', { type: 'error', message: Object.values(error.response?.data?.error?.request)?.[0] || 'Что-то пошло не так =(' });
         })
         .then(() => {
           productAdded.value = true;

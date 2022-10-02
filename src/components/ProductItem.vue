@@ -4,7 +4,7 @@
       <img :src="product.image" alt="Название товара">
     </a>
 
-    <h3 class="catalog__title"><a href="#">{{ selectedProductOffer.title }}</a></h3>
+    <h3 class="catalog__title"><a class="catalog__title-link" href="#">{{ selectedProductOffer.title }}</a></h3>
 
     <span class="catalog__price">{{ $filters.numberFormat(selectedProductOffer.price) }} ₽</span>
 
@@ -58,6 +58,7 @@ import BaseModal from '@/pages/BaseModal.vue';
 import ProductQuickView from '@/components/ProductQuickView.vue';
 import DataLoader from '@/components/DataLoader.vue';
 import eventBus from '@/eventBus';
+import { parseErrorMessage } from '@/helpers/errors-helper';
 
 export default {
   name: 'ProductItem',
@@ -98,7 +99,7 @@ export default {
       })
         .catch((error) => {
           this.offerSendingError = true;
-          this.showSnack('error', Object.values(error.response?.data?.error?.request)?.[0] || 'Что-то пошло не так =(');
+          this.showSnack('error', parseErrorMessage(error) || 'Что-то пошло не так =(');
         })
         .then(() => {
           if (!this.offerSendingError) {
@@ -122,6 +123,11 @@ export default {
 <style>
 .colors {
   margin-bottom: 10px;
+}
+
+.catalog__title {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .product-item__buttons {

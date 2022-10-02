@@ -24,10 +24,21 @@ export default {
       snackVisible: false,
       type: 'error',
       message: null,
+      timer: null,
     };
   },
   created() {
-    eventBus.$on('showSnack', (params) => this.showSnackBar(params));
+    eventBus.$on('showSnack', (params) => {
+      if (this.snackVisible) {
+        this.snackVisible = false;
+        clearTimeout(this.timer);
+        setTimeout(() => {
+          this.showSnackBar(params);
+        }, 150);
+      } else {
+        this.showSnackBar(params);
+      }
+    });
   },
   methods: {
     showSnackBar(params) {
@@ -35,7 +46,7 @@ export default {
       this.message = params.message;
       this.type = params.type;
 
-      setTimeout(() => {
+      this.timer = setTimeout(() => {
         this.snackVisible = false;
       }, 3000);
     },
@@ -71,7 +82,7 @@ export default {
 
 .slide-fade-enter-from,
 .slide-fade-leave-to {
-  transform: translateX(20px);
+  transform: translateX(10px);
   opacity: 0;
 }
 </style>

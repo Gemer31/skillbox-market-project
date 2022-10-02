@@ -1,59 +1,73 @@
 <template>
-  <li class="cart__item product">
-    <div class="product__pic">
-      <img :src="item.productOffer.product.preview.file.url" width="120" height="120" :alt="item.productOffer.title">
-    </div>
-    <h3 class="product__title">{{ item.productOffer.title }}</h3>
-    <div class="product__info">
-      <p v-if="item.color" class="product__info--color">Цвет:
-        <span><i :style="{ 'background-color': item.color.color.code }"></i>{{ item.color.color.title }}</span>
-      </p>
-      <p v-if="item.productOffer.propValues?.length && item.productOffer.product.mainProp.code !== 'color'">
-        {{ item.productOffer.product.mainProp.title }}: <span>{{ item.productOffer.propValues?.[0]?.value }}</span>
-      </p>
-    </div>
+  <Transition name="fade" mode="out-in">
+    <li class="cart__item product">
+      <div class="product__pic">
+        <img :src="item.productOffer.product.preview.file.url" width="120" height="120" :alt="item.productOffer.title">
+      </div>
+      <h3 class="product__title">{{ item.productOffer.title }}</h3>
+      <div class="product__info">
+        <p v-if="item.color" class="product__info--color">Цвет:
+          <span><i :style="{ 'background-color': item.color.color.code }"></i>{{ item.color.color.title }}</span>
+        </p>
+        <p v-if="item.productOffer.propValues?.length && item.productOffer.product.mainProp.code !== 'color'">
+          {{ item.productOffer.product.mainProp.title }}: <span>{{ item.productOffer.propValues?.[0]?.value }}</span>
+        </p>
+      </div>
 
-    <span class="product__code">Артикул: {{ item.id }}</span>
+      <span class="product__code">Артикул: {{ item.id }}</span>
 
-    <div class="product__counter form__counter">
-      <button type="button" aria-label="Убрать один товар" @click.prevent="quantity = quantity - 1">
-        <svg width="10" height="10" fill="currentColor">
-          <use xlink:href="#icon-minus"></use>
+      <div class="product__counter form__counter">
+        <button type="button" aria-label="Убрать один товар" @click.prevent="quantity = quantity - 1">
+          <svg width="10" height="10" fill="currentColor">
+            <use xlink:href="#icon-minus"></use>
+          </svg>
+        </button>
+
+        <label for="counter">
+          <input id="counter" type="text" v-model.number="quantity" name="count">
+        </label>
+
+        <button type="button" aria-label="Добавить один товар" @click.prevent="quantity = quantity + 1">
+          <svg width="10" height="10" fill="currentColor">
+            <use xlink:href="#icon-plus"></use>
+          </svg>
+        </button>
+      </div>
+
+      <b class="product__price">{{ $filters.numberFormat(item.price * item.quantity) }} ₽</b>
+
+      <button class="button product__del button-del"
+              type="button"
+              aria-label="Удалить товар из корзины"
+              @click.prevent="deleteProduct({ basketItemId: item.id })">
+        <svg width="20" height="20" fill="currentColor">
+          <use xlink:href="#icon-close"></use>
         </svg>
       </button>
+    </li>
+  </Transition>
 
-      <label for="counter">
-        <input id="counter" type="text" v-model.number="quantity" name="count">
-      </label>
-
-      <button type="button" aria-label="Добавить один товар" @click.prevent="quantity = quantity + 1">
-        <svg width="10" height="10" fill="currentColor">
-          <use xlink:href="#icon-plus"></use>
-        </svg>
-      </button>
-    </div>
-
-    <b class="product__price">{{ $filters.numberFormat(item.price * item.quantity) }} ₽</b>
-
-    <button class="button product__del button-del"
-            type="button"
-            aria-label="Удалить товар из корзины"
-            @click.prevent="deleteProductFromCart({ basketItemId: item.id })">
-      <svg width="20" height="20" fill="currentColor">
-        <use xlink:href="#icon-close"></use>
-      </svg>
-    </button>
-  </li>
 </template>
 
 <script>
 import { mapActions } from 'vuex';
+import eventBus from '@/eventBus';
+import { parseErrorMessage } from '@/helpers/errors-helper';
 
 export default {
   name: 'CartItem',
   props: ['item'],
   methods: {
     ...mapActions(['deleteProductFromCart']),
+    deleteProduct(payload) {
+      this.deleteProductFromCart(payload)
+        .catch((error) => {
+          eventBus.$emit('showSnack', {
+            type: 'error',
+            message: parseErrorMessage(error) || 'Ошибка при удалении товара =(',
+          });
+        });
+    },
   },
   computed: {
     quantity: {
@@ -64,7 +78,13 @@ export default {
         this.$store.dispatch('updateCartProductAmount', {
           basketItemId: this.item.id,
           quantity: value,
-        });
+        })
+          .catch((error) => {
+            eventBus.$emit('showSnack', {
+              type: 'error',
+              message: parseErrorMessage(error) || 'Ошибка при обновлении товара =(',
+            });
+          });
       },
     },
   },

@@ -62,13 +62,14 @@
 
           <Transition name="fade" mode="out-in" :duration="{ delay: 500 }">
             <div v-if="totalOffersQuantity" class="cart__total">
-              <p>Итого: <b>{{ totalOffersQuantity }}</b> товара на сумму <b>{{ totalPrice }} ₽</b></p>
+              <p>Количество товаров: <b>{{ totalOffersQuantity }}</b> шт.</p>
+              <p>Сумма: <b>{{ $filters.numberFormat(totalPrice) }} ₽</b></p>
             </div>
           </Transition>
 
           <Transition name="fade" mode="out-in">
             <div v-if="formSending" class="order-sending">
-              <DataLoader width="50" height="50"/>
+              <DataLoader width="68" height="68"/>
             </div>
             <button v-else class="cart__button button button--primery" type="submit" :disabled="!cartItems?.length">
               Оформить заказ
