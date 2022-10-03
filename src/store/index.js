@@ -6,7 +6,7 @@ export default createStore({
   state() {
     return {
       userAccessKey: null,
-      cartProductsData: [],
+      cartProductsData: null,
       orderInfo: null,
     };
   },
@@ -15,7 +15,7 @@ export default createStore({
       state.orderInfo = orderInfo;
     },
     resetCart(state) {
-      state.cartProductsData = [];
+      state.cartProductsData = null;
     },
     updateCartProductAmount(state, { basketItemId, quantity }) {
       const cartItem = state.cartProductsData.items?.find((item) => item.id === basketItemId);
@@ -35,7 +35,7 @@ export default createStore({
   },
   getters: {
     cartDetailProducts(state) {
-      return state.cartProductsData.items;
+      return state.cartProductsData?.items;
     },
     cartTotalPrice(state, getters) {
       return getters.cartDetailProducts?.reduce((result, item) => (item.price * item.quantity) + result, 0);

@@ -6,7 +6,7 @@
     <svg width="30" height="21" fill="currentColor">
       <use xlink:href="#icon-cart"></use>
     </svg>
-    <span class="header__count" aria-label="Количество товаров">{{ cartDetailProducts?.length }}</span>
+    <span class="header__count" aria-label="Количество товаров">{{ cartDetailProducts?.length || 0 }}</span>
   </router-link>
 </template>
 
@@ -26,7 +26,7 @@ export default {
     ...mapGetters(['cartDetailProducts']),
   },
   watch: {
-    cartDetailProducts(oldValue, newValue) {
+    cartDetailProducts(newValue, oldValue) {
       if (oldValue?.length !== newValue?.length) {
         this.firstLoading = false;
         this.cartVisible = false;
