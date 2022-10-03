@@ -7,20 +7,20 @@
 
       <div class="main-page__catalog-header">
         <span class="content__info">Найдено товаров: {{ countProducts }}</span>
-          <ul class="colors">
-            <li class="colors__item pagination__link--arrow main-page__products-per-page-value"
-                :class="{ 'main-page__products-per-page-value__selected': value === productsPerPageChanged}"
-                v-for="(value) in productsPerPageValues"
-                :key="'products-per-page-' + value">
-              <label class="colors__label">
-                <input class="colors__radio sr-only"
-                       type="radio"
-                       :value="value"
-                       v-model="productsPerPageChanged"
-                >{{ value }}
-              </label>
-            </li>
-          </ul>
+        <ul class="colors">
+          <li class="colors__item pagination__link--arrow main-page__products-per-page-value"
+              :class="{ 'main-page__products-per-page-value__selected': value === productsPerPage}"
+              v-for="value in productsPerPageValues"
+              :key="'products-per-page-' + value">
+            <label class="colors__label">
+              <input class="colors__radio sr-only"
+                     type="radio"
+                     :value="value"
+                     @click.prevent="productsPerPageChanged($event.target.value)"
+              >{{ value }}
+            </label>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -76,13 +76,13 @@ export default {
   },
   data() {
     return {
-      filterPriceFrom: null,
-      filterPriceTo: null,
-      filterCategoryId: null,
+      filterPriceFrom: '',
+      filterPriceTo: '',
+      filterCategoryId: 'all',
       filterColorId: '',
       currentPage: 1,
 
-      productsPerPage: 3,
+      productsPerPage: null,
       productsPerPageValues: [3, 5, 7],
 
       productsData: null,
@@ -104,18 +104,13 @@ export default {
     countProducts() {
       return this.productsData ? this.productsData.pagination.total : 0;
     },
-    productsPerPageChanged: {
-      set(value) {
-        this.currentPage = 1;
-        this.productsPerPage = value;
-      },
-      get() {
-        this.loadProduts();
-        return this.productsPerPage;
-      },
-    },
   },
   methods: {
+    productsPerPageChanged(value) {
+      this.currentPage = 1;
+      this.productsPerPage = +value;
+      localStorage.setItem('productsPerPage', value);
+    },
     loadProduts() {
       this.productsLoading = true;
       clearTimeout(this.loadProductsTimer);
@@ -125,11 +120,11 @@ export default {
         limit: this.productsPerPage,
       };
 
-      if (this.filterPriceFrom && this.filterPriceFrom !== 0) {
+      if (+this.filterPriceFrom !== 0) {
         params.minPrice = this.filterPriceFrom;
       }
 
-      if (this.filterPriceTo && this.filterPriceTo !== 0) {
+      if (+this.filterPriceTo !== 0) {
         params.maxPrice = this.filterPriceTo;
       }
 
@@ -155,6 +150,9 @@ export default {
     },
   },
   watch: {
+    productsPerPage() {
+      this.loadProduts();
+    },
     currentPage() {
       this.loadProduts();
     },
@@ -167,11 +165,15 @@ export default {
     filterCategoryId() {
       this.loadProduts();
     },
-    filterColorId() {
-      this.loadProduts();
-    },
+    // filterColorId() {
+    //   this.loadProduts();
+    // },
   },
   created() {
+    this.productsPerPage = +localStorage.getItem('productsPerPage');
+    if (!this.productsPerPage) {
+      this.productsPerPageChanged(this.productsPerPageValues[0]);
+    }
     this.loadProduts();
   },
 };

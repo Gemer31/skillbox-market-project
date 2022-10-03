@@ -129,7 +129,6 @@ a {
 
 .button--primery:not(:disabled):focus, .button--primery:not(:disabled):hover {
     background-color: transparent;
-    color: #fff
 }
 
 .button--second {

@@ -1,6 +1,5 @@
 <template>
-  <SnackBar class="snack"/>
-
+  <SnackBar/>
   <HeaderView :cart-loading="cartLoading" :cart-loading-failed="cartLoadingFailed"/>
   <router-view :cart-loading="cartLoading" :cart-loading-failed="cartLoadingFailed"/>
   <FooterView/>

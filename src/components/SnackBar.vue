@@ -61,7 +61,7 @@ export default {
   padding: 10px;
   min-width: 120px;
   max-width: 400px;
-  position: absolute;
+  position: fixed;
   top: 90px;
   color: white;
   right: 10px;

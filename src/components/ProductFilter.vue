@@ -103,8 +103,8 @@ export default {
   },
   data() {
     return {
-      currentPriceFrom: null,
-      currentPriceTo: null,
+      currentPriceFrom: '',
+      currentPriceTo: '',
       currentCategoryId: 'all',
       selectedCategoryProps: null,
       currentColorId: '',
@@ -142,18 +142,20 @@ export default {
       this.$emit('update:priceFrom', this.currentPriceFrom);
       this.$emit('update:priceTo', this.currentPriceTo);
       this.$emit('update:categoryId', this.currentCategoryId);
-      this.$emit('update:colorId', this.currentColorId);
+      // this.$emit('update:colorId', this.currentColorId);
       this.$emit('update:currentPage', 1);
     },
     reset() {
-      this.$emit('update:priceFrom', null);
-      this.$emit('update:priceTo', null);
+      this.$emit('update:priceFrom', '');
+      this.$emit('update:priceTo', '');
       this.$emit('update:categoryId', 'all');
-      this.$emit('update:colorId', '');
+      // this.$emit('update:colorId', '');
       this.$emit('update:currentPage', 1);
 
-      this.currentPriceFrom = null;
-      this.currentPriceTo = null;
+      this.currentPriceFrom = '';
+      this.currentPriceTo = '';
+      this.$refs.priceFrom.value = '';
+      this.$refs.priceTo.value = '';
       this.currentCategoryId = 'all';
       this.currentCategoryProps = null;
       this.resetButtonVisible = false;
@@ -171,7 +173,8 @@ export default {
         });
     },
     convertToNumbersOnly(value) {
-      return value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+      return value.replace(/[^0-9.]/g, '')
+        .replace(/(\..*?)\..*/g, '$1');
     },
   },
   created() {

@@ -92,14 +92,16 @@ export default {
 }
 
 .fade-group-leave-active {
-  transition: max-height 0.15s linear;
+  transition: all 0.15s linear;
 }
 
 .fade-group-leave-from {
+  opacity: 1;
   max-height: 220px;
 }
 
 .fade-group-leave-to {
+  opacity: 0;
   max-height: 0;
   margin-bottom: 0;
 }
