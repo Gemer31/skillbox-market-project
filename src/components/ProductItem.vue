@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a class="catalog__pic" href="#" @click.prevent="isQuickViewOpen = true">
+    <a class="catalog__pic" href="#">
       <img :src="product.image" alt="Название товара">
     </a>
 
