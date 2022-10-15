@@ -62,9 +62,10 @@ export default {
   min-width: 120px;
   max-width: 400px;
   position: fixed;
-  top: 90px;
+  top: 18px;
   color: white;
   right: 10px;
+  z-index: 1;
   display: flex;
 }
 

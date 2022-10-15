@@ -57,8 +57,8 @@
         <div v-if="categoryPropsLoading" class="props-loader">
           <DataLoader :width="70"/>
         </div>
-        <div v-else-if="currentCategoryProps?.length">
-          <fieldset class="form__block" v-for="prop in currentCategoryProps" :key="prop.id">
+        <div v-else-if="categoryPropsData?.length">
+          <fieldset class="form__block" v-for="prop in categoryPropsData" :key="prop.id">
             <legend class="form__legend">{{ prop.title }}</legend>
             <ul class="check-list">
               <li class="check-list__item" v-for="values in prop.availableValues" :key="values.value">
@@ -67,6 +67,8 @@
                          type="checkbox"
                          name="volume"
                          :value="values.value"
+                         @input="addCategoryPropOption(prop.code, $event.target.value)"
+                         :checked="currentCategoryProps?.get(prop.code)?.includes(values.value)"
                   >
                   <span class="check-list__desc">{{ values.value }}<span>({{ values.productsCount }})</span></span>
                 </label>
@@ -94,6 +96,7 @@
 import axios from 'axios';
 import API_BASE_URL from '@/config';
 import DataLoader from '@/components/DataLoader.vue';
+import cloneDeep from 'lodash.clonedeep';
 
 export default {
   name: 'ProductFilter',
@@ -106,13 +109,12 @@ export default {
       currentPriceFrom: '',
       currentPriceTo: '',
       currentCategoryId: 'all',
-      selectedCategoryProps: null,
-      currentColorId: '',
+      currentCategoryProps: null,
 
       categoryPropsLoading: false,
       resetButtonVisible: false,
 
-      currentCategoryProps: null,
+      categoryPropsData: null,
       categoriesData: null,
       colorsData: null,
     };
@@ -127,29 +129,45 @@ export default {
     categoryId(value) {
       this.currentCategoryId = value;
     },
-    colorId(value) {
-      this.currentColorId = value;
+    categoryProps(value) {
+      this.currentCategoryProps = value;
     },
   },
   methods: {
-    // priceInputChanged(input) {
-    //   // console.log(input);
-    //   // const preparedValue = Number(input.value.replace(/[^\d]/g, ''));
-    //   // // eslint-disable-next-line no-param-reassign
-    //   // input.value = preparedValue;
-    // },
+    addCategoryPropOption(propName, newValue) {
+      if (!this.currentCategoryProps) {
+        this.currentCategoryProps = new Map();
+      }
+
+      if (this.currentCategoryProps.has(propName)) {
+        let values = this.currentCategoryProps.get(propName);
+        values = values.includes(newValue)
+          ? values.filter((item) => item !== newValue)
+          : [...values, newValue];
+
+        if (values.length) {
+          this.currentCategoryProps.set(propName, values);
+        } else {
+          this.currentCategoryProps.delete(propName);
+        }
+      } else {
+        this.currentCategoryProps.set(propName, [newValue]);
+      }
+      this.currentCategoryProps = cloneDeep(this.currentCategoryProps);
+      console.log(this.currentCategoryProps);
+    },
     submit() {
       this.$emit('update:priceFrom', this.currentPriceFrom);
       this.$emit('update:priceTo', this.currentPriceTo);
       this.$emit('update:categoryId', this.currentCategoryId);
-      // this.$emit('update:colorId', this.currentColorId);
+      this.$emit('update:categoryProps', this.currentCategoryProps);
       this.$emit('update:currentPage', 1);
     },
     reset() {
       this.$emit('update:priceFrom', '');
       this.$emit('update:priceTo', '');
       this.$emit('update:categoryId', 'all');
-      // this.$emit('update:colorId', '');
+      this.$emit('update:categoryProps', null);
       this.$emit('update:currentPage', 1);
 
       this.currentPriceFrom = '';
@@ -158,6 +176,7 @@ export default {
       this.$refs.priceTo.value = '';
       this.currentCategoryId = 'all';
       this.currentCategoryProps = null;
+      this.categoryPropsData = null;
       this.resetButtonVisible = false;
     },
     loadCategories() {
@@ -213,12 +232,13 @@ export default {
 
             axios.get(`${API_BASE_URL}/api/productCategories/${value}`)
               .then((response) => {
-                this.currentCategoryProps = response.data.productProps;
+                this.categoryPropsData = response.data.productProps;
                 this.categoryPropsLoading = false;
               });
           } else {
-            this.currentCategoryProps = null;
+            this.categoryPropsData = null;
           }
+          this.currentCategoryProps = null;
         }
         this.currentCategoryId = value;
         this.resetButtonVisible = value !== 'all';

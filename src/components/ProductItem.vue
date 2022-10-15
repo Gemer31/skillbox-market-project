@@ -9,13 +9,13 @@
     <span class="catalog__price">{{ $filters.numberFormat(selectedProductOffer.price) }} ₽</span>
 
     <ul v-if="product.colors?.length" class="colors colors--black">
-      <li class="colors__item" v-for="color in product.colors" :key="product.title + '-' + color.id">
+      <li class="colors__item" v-for="color in product.colors" :key="product.title + '-' + color.color.id">
         <label class="colors__label">
           <input class="colors__radio sr-only"
                  type="radio"
-                 :value="color.id"
+                 :value="color.color.id"
                  v-model="selectedColorId"
-                 :checked="selectedColorId === color.id"
+                 :checked="selectedColorId === color.color.id"
           ><span class="colors__value" :style="{ 'background-color': color.color.code }"></span>
         </label>
       </li>
@@ -83,7 +83,7 @@ export default {
   },
   created() {
     this.changeOffer();
-    this.selectedColorId = this.product.colors?.[0]?.id;
+    this.selectedColorId = this.product.colors?.[0]?.color?.id;
   },
   methods: {
     colorChanged(value) {

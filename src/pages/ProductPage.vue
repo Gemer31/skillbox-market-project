@@ -46,12 +46,12 @@
                 <ul class="colors">
                   <li class="colors__item"
                       v-for="color in product.colors"
-                      :key="color.id"
+                      :key="color.color.id"
                   >
                     <label class="colors__label">
                       <input class="colors__radio sr-only"
                              type="radio"
-                             :value="color.id"
+                             :value="color.color.id"
                              v-model="selectedColorId"
                       >
                       <span class="colors__value" :style="{ 'background-color': color.color.code }"></span>
@@ -73,9 +73,10 @@
                              name="sizes-item"
                              :value="offer.id"
                              v-model="selectedOfferId"
-                      ><span class="sizes__value" :class="{ 'sizes__value-selected': selectedOfferId === offer.id }">{{
-                        offer.propValues[0].value
-                      }}</span>
+                      >
+                      <span class="sizes__value" :class="{ 'sizes__value-selected': selectedOfferId === offer.id }">
+                        {{offer.propValues[0].value}}
+                      </span>
                     </label>
                   </li>
                 </ul>
@@ -222,7 +223,7 @@ export default defineComponent({
     watch(() => product.value, (productValue) => {
       if (productValue) {
         selectedOfferId.value = productValue.offers?.[0]?.id;
-        selectedColorId.value = productValue.colors?.[0]?.id;
+        selectedColorId.value = productValue.colors?.[0]?.color?.id;
       }
     }, { immediate: true });
 

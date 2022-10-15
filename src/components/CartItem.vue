@@ -9,7 +9,7 @@
         <p v-if="item.color" class="product__info--color">Цвет:
           <span><i :style="{ 'background-color': item.color.color.code }"></i>{{ item.color.color.title }}</span>
         </p>
-        <p v-if="item.productOffer.propValues?.length && item.productOffer.product.mainProp.code !== 'color'">
+        <p v-if="item.productOffer.propValues?.length">
           {{ item.productOffer.product.mainProp.title }}: <span>{{ item.productOffer.propValues?.[0]?.value }}</span>
         </p>
       </div>

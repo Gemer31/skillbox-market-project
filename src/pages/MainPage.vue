@@ -31,6 +31,7 @@
         v-model:category-id="filterCategoryId"
         v-model:color-id="filterColorId"
         v-model:current-page="currentPage"
+        v-model:category-props="filterCategoryProps"
       />
       <section class="catalog">
 
@@ -79,6 +80,7 @@ export default {
       filterPriceFrom: '',
       filterPriceTo: '',
       filterCategoryId: 'all',
+      filterCategoryProps: null,
       filterColorId: '',
       currentPage: 1,
 
@@ -123,14 +125,18 @@ export default {
       if (+this.filterPriceFrom !== 0) {
         params.minPrice = this.filterPriceFrom;
       }
-
       if (+this.filterPriceTo !== 0) {
         params.maxPrice = this.filterPriceTo;
       }
-
       if (this.filterCategoryId !== 'all') {
         params.categoryId = this.filterCategoryId;
       }
+      if (this.filterCategoryProps?.size) {
+        [...this.filterCategoryProps.keys()].forEach((propName) => {
+          params[`props[${propName}]`] = this.filterCategoryProps.get(propName);
+        });
+      }
+
       // if (this.filterColorId) {
       //   params.colorId = this.filterColorId;
       // }
@@ -163,6 +169,9 @@ export default {
       this.loadProduts();
     },
     filterCategoryId() {
+      this.loadProduts();
+    },
+    filterCategoryProps() {
       this.loadProduts();
     },
     // filterColorId() {
